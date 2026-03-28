@@ -10,6 +10,49 @@
   <script src="./app-config.js"></script>
   <style>
     :root {
+      color-scheme: light dark;
+      --bg: linear-gradient(180deg, #fff8ef 0%, #f9fafb 55%, #eef2ff 100%);
+      --panel: rgba(255, 255, 255, 0.88);
+      --text: #0f172a;
+      --muted: #334155;
+      --accent: #0f766e;
+      --border: rgba(15, 23, 42, 0.12);
+      --caption-size: clamp(2rem, 7vw, 5.5rem);
+      --caption-line-height: 1.08;
+      --body-scale: 1;
+      --control-bg: rgba(15, 23, 42, 0.04);
+      --control-text: var(--text);
+      --control-border: var(--border);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: radial-gradient(circle at top, #16314b 0%, #06111c 45%, #02050a 100%);
+        --panel: rgba(6, 17, 28, 0.8);
+        --text: #f8fafc;
+        --muted: #bfd4e5;
+        --accent: #fde047;
+        --border: rgba(191, 212, 229, 0.2);
+        --control-bg: rgba(255, 255, 255, 0.08);
+        --control-text: #f8fafc;
+        --control-border: rgba(191, 212, 229, 0.2);
+      }
+    }
+
+    body[data-theme="light"] {
+      color-scheme: light;
+      --bg: linear-gradient(180deg, #fff8ef 0%, #f9fafb 55%, #eef2ff 100%);
+      --panel: rgba(255, 255, 255, 0.88);
+      --text: #0f172a;
+      --muted: #334155;
+      --accent: #0f766e;
+      --border: rgba(15, 23, 42, 0.12);
+      --control-bg: rgba(15, 23, 42, 0.04);
+      --control-text: #0f172a;
+      --control-border: rgba(15, 23, 42, 0.12);
+    }
+
+    body[data-theme="dark"] {
       color-scheme: dark;
       --bg: radial-gradient(circle at top, #16314b 0%, #06111c 45%, #02050a 100%);
       --panel: rgba(6, 17, 28, 0.8);
@@ -17,6 +60,41 @@
       --muted: #bfd4e5;
       --accent: #fde047;
       --border: rgba(191, 212, 229, 0.2);
+      --control-bg: rgba(255, 255, 255, 0.08);
+      --control-text: #f8fafc;
+      --control-border: rgba(191, 212, 229, 0.2);
+    }
+
+    body[data-theme="contrast"] {
+      color-scheme: dark;
+      --bg: #000000;
+      --panel: #000000;
+      --text: #fff200;
+      --muted: #fff8a6;
+      --accent: #fff200;
+      --border: rgba(255, 242, 0, 0.55);
+      --control-bg: #111111;
+      --control-text: #fff200;
+      --control-border: rgba(255, 242, 0, 0.55);
+    }
+
+    body[data-text-size="small"] {
+      --caption-size: clamp(1.7rem, 5.5vw, 4.4rem);
+      --body-scale: 0.95;
+    }
+
+    body[data-text-size="large"] {
+      --caption-size: clamp(2.4rem, 8vw, 6.4rem);
+      --body-scale: 1.08;
+    }
+
+    body[data-text-size="x-large"] {
+      --caption-size: clamp(2.8rem, 9vw, 7.4rem);
+      --body-scale: 1.16;
+    }
+
+    body[data-line-spacing="wide"] {
+      --caption-line-height: 1.35;
     }
 
     * {
@@ -30,6 +108,7 @@
       background: var(--bg);
       color: var(--text);
       padding: 5vw;
+      font-size: calc(1rem * var(--body-scale));
     }
 
     main {
@@ -53,6 +132,78 @@
       box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
     }
 
+    #settings-shell {
+      padding: 1.25rem;
+    }
+
+    .settings-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    }
+
+    .setting-group {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .setting-group label,
+    .setting-group legend {
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .setting-group fieldset {
+      border: 0;
+      margin: 0;
+      padding: 0;
+      min-width: 0;
+    }
+
+    .setting-button,
+    .setting-select {
+      min-height: 44px;
+      border-radius: 0.9rem;
+      border: 1px solid var(--control-border);
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 0.7rem 0.95rem;
+      font: inherit;
+    }
+
+    .setting-button {
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .setting-button[aria-pressed="true"] {
+      background: var(--accent);
+      color: #081018;
+      border-color: transparent;
+    }
+
+    .setting-select {
+      width: 100%;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
     .eyebrow {
       color: var(--accent);
       text-transform: uppercase;
@@ -69,9 +220,9 @@
     }
 
     #display {
-      font-size: clamp(2rem, 7vw, 5.5rem);
+      font-size: var(--caption-size);
       font-weight: 800;
-      line-height: 1.08;
+      line-height: var(--caption-line-height);
       overflow-wrap: anywhere;
     }
 
@@ -98,6 +249,12 @@
       line-height: 1.5;
     }
 
+    #live-status {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.4;
+    }
+
     code {
       font-family: "SF Mono", "Menlo", monospace;
       font-size: 0.92rem;
@@ -105,6 +262,12 @@
 
     .fade-in {
       animation: fade-in 220ms ease-out;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .fade-in {
+        animation: none;
+      }
     }
 
     @keyframes fade-in {
@@ -116,6 +279,25 @@
       to {
         opacity: 1;
         transform: translateY(0);
+      }
+    }
+
+    @media (forced-colors: active) {
+      body {
+        background: Canvas;
+        color: CanvasText;
+      }
+
+      .panel,
+      .setting-button,
+      .setting-select,
+      .slide-placeholder {
+        border-color: CanvasText;
+      }
+
+      .setting-button[aria-pressed="true"] {
+        background: Highlight;
+        color: HighlightText;
       }
     }
 
@@ -133,12 +315,52 @@
 </head>
 <body>
   <main>
+    <section class="panel" id="settings-shell">
+      <div class="stack">
+        <p class="eyebrow">Accessibility Settings</p>
+        <div class="settings-grid">
+          <div class="setting-group">
+            <fieldset>
+              <legend>Theme</legend>
+              <div class="button-row" id="theme-controls">
+                <button class="setting-button" type="button" data-setting-group="theme" data-setting-value="system" aria-pressed="true" hx-on:click="window.LocalSyncAudienceSettings.setTheme('system')">System</button>
+                <button class="setting-button" type="button" data-setting-group="theme" data-setting-value="light" aria-pressed="false" hx-on:click="window.LocalSyncAudienceSettings.setTheme('light')">Light</button>
+                <button class="setting-button" type="button" data-setting-group="theme" data-setting-value="dark" aria-pressed="false" hx-on:click="window.LocalSyncAudienceSettings.setTheme('dark')">Dark</button>
+                <button class="setting-button" type="button" data-setting-group="theme" data-setting-value="contrast" aria-pressed="false" hx-on:click="window.LocalSyncAudienceSettings.setTheme('contrast')">High Contrast</button>
+              </div>
+            </fieldset>
+          </div>
+          <div class="setting-group">
+            <label for="text-size-select">Text Size</label>
+            <select class="setting-select" id="text-size-select" hx-on:change="window.LocalSyncAudienceSettings.setTextSize(this.value)">
+              <option value="medium">Medium</option>
+              <option value="small">Small</option>
+              <option value="large">Large</option>
+              <option value="x-large">Extra Large</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label for="line-spacing-select">Line Spacing</label>
+            <select class="setting-select" id="line-spacing-select" hx-on:change="window.LocalSyncAudienceSettings.setLineSpacing(this.value)">
+              <option value="standard">Standard</option>
+              <option value="wide">Wide</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <span>Reset</span>
+            <button class="setting-button" type="button" hx-on:click="window.LocalSyncAudienceSettings.reset()">Use Device Defaults</button>
+          </div>
+        </div>
+        <p class="visually-hidden" id="settings-announcer" aria-live="polite"></p>
+      </div>
+    </section>
     <section class="panel" id="caption-shell">
       <div class="stack">
         <p class="eyebrow">Live Captions</p>
         <p id="connection-note">Waiting for a configured caption stream.</p>
+        <p id="live-status">Screen reader live announcements are enabled.</p>
         <div id="caption-stream" sse-swap="caption-update">
-          <div id="display" class="caption-text">Waiting for speaker...</div>
+          <div id="display" class="caption-text" role="status" aria-live="polite" aria-atomic="false">Waiting for speaker...</div>
         </div>
       </div>
     </section>
@@ -157,12 +379,102 @@
     const connectionNote = document.getElementById('connection-note');
     const captionStream = document.getElementById('caption-stream');
     const slideStream = document.getElementById('slide-stream');
+    const settingsAnnouncer = document.getElementById('settings-announcer');
+    const textSizeSelect = document.getElementById('text-size-select');
+    const lineSpacingSelect = document.getElementById('line-spacing-select');
+    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    const defaultAudienceSettings = {
+      theme: 'system',
+      textSize: 'medium',
+      lineSpacing: 'standard'
+    };
+    const settingsStorageKey = 'localsync-audience-settings';
+
+    function readAudienceSettings() {
+      try {
+        const raw = window.localStorage.getItem(settingsStorageKey);
+        return raw ? { ...defaultAudienceSettings, ...JSON.parse(raw) } : { ...defaultAudienceSettings };
+      } catch (error) {
+        return { ...defaultAudienceSettings };
+      }
+    }
+
+    function writeAudienceSettings(settings) {
+      window.localStorage.setItem(settingsStorageKey, JSON.stringify(settings));
+    }
+
+    function syncPressedButtons(group, activeValue) {
+      const buttons = document.querySelectorAll(`[data-setting-group="${group}"]`);
+      for (const button of buttons) {
+        button.setAttribute('aria-pressed', String(button.dataset.settingValue === activeValue));
+      }
+    }
+
+    function applyAudienceSettings(settings, announcement) {
+      if (settings.theme === 'system') {
+        delete document.body.dataset.theme;
+      } else {
+        document.body.dataset.theme = settings.theme;
+      }
+
+      if (settings.textSize === 'medium') {
+        delete document.body.dataset.textSize;
+      } else {
+        document.body.dataset.textSize = settings.textSize;
+      }
+
+      if (settings.lineSpacing === 'standard') {
+        delete document.body.dataset.lineSpacing;
+      } else {
+        document.body.dataset.lineSpacing = settings.lineSpacing;
+      }
+
+      textSizeSelect.value = settings.textSize;
+      lineSpacingSelect.value = settings.lineSpacing;
+      syncPressedButtons('theme', settings.theme);
+      writeAudienceSettings(settings);
+
+      if (announcement) {
+        settingsAnnouncer.textContent = announcement;
+      }
+    }
+
+    const audienceSettings = readAudienceSettings();
+
+    window.LocalSyncAudienceSettings = {
+      setTheme(theme) {
+        audienceSettings.theme = theme;
+        applyAudienceSettings(audienceSettings, `Theme changed to ${theme}.`);
+      },
+      setTextSize(textSize) {
+        audienceSettings.textSize = textSize;
+        applyAudienceSettings(audienceSettings, `Text size changed to ${textSize}.`);
+      },
+      setLineSpacing(lineSpacing) {
+        audienceSettings.lineSpacing = lineSpacing;
+        applyAudienceSettings(audienceSettings, `Line spacing changed to ${lineSpacing}.`);
+      },
+      reset() {
+        audienceSettings.theme = defaultAudienceSettings.theme;
+        audienceSettings.textSize = defaultAudienceSettings.textSize;
+        audienceSettings.lineSpacing = defaultAudienceSettings.lineSpacing;
+        applyAudienceSettings(audienceSettings, 'Display preferences reset to device defaults.');
+      }
+    };
 
     function connectStream(streamUrl) {
       document.body.setAttribute('hx-ext', 'sse');
       document.body.setAttribute('sse-connect', streamUrl);
       window.htmx.process(document.body);
     }
+
+    applyAudienceSettings(audienceSettings);
+
+    prefersDarkScheme.addEventListener('change', () => {
+      if (audienceSettings.theme === 'system') {
+        applyAudienceSettings(audienceSettings);
+      }
+    });
 
     if (config.streamUrl) {
       connectStream(config.streamUrl);

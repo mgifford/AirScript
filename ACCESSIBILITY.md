@@ -12,14 +12,14 @@ We aim to meet or exceed **WCAG 2.2 Level AA** standards for all audience-facing
 
 ### A. Perceivable: Multi-Modal Communication
 
-- **Live Regions:** The captioning area utilizes `aria-live="polite"` (or `assertive` depending on user settings) to ensure that screen readers announce new text without the user needing to manually refresh or move focus.
+- **Live Regions:** The captioning area utilizes `aria-live="polite"` to ensure that screen readers announce new text without the user needing to manually refresh or move focus.
 - **Visual Contrast:** The default theme provides a contrast ratio of at least **7:1** for text.
-- **High Contrast Mode:** We provide a "High Contrast" toggle (Yellow on Black) to assist users with low vision or light sensitivity.
+- **High Contrast Mode:** The audience page includes a "High Contrast" toggle (Yellow on Black) to assist users with low vision or light sensitivity.
 
 ### B. Operable: Low-Barrier Interaction
 
 - **No-App Entry:** By using a QR code and standard web technologies (HTML/HTMX), we eliminate the barrier of downloading proprietary software that may not be accessible.
-- **Touch Targets:** All interactive elements, such as the "Pulse" slider or theme toggles, have a minimum hit area of **44x44 CSS pixels** to accommodate users with motor impairments.
+- **Touch Targets:** All interactive elements, such as theme toggles and settings controls, have a minimum hit area of **44x44 CSS pixels** to accommodate users with motor impairments.
 - **Keyboard Support:** Every feature accessible via touch/mouse is fully navigable via keyboard (`Tab` and `Space/Enter`).
 
 ### C. Understandable: Clarity and Consistency
@@ -38,13 +38,13 @@ We aim to meet or exceed **WCAG 2.2 Level AA** standards for all audience-facing
 
 ### Captioning Logic
 
-- **Buffer Control:** Users should have the option to slow down the "scroll" of captions to suit their reading speed.
-- **Font Scaling:** We utilize `rem` units for all typography, allowing the audience to scale text up to **400%** using their browser's native zoom without breaking the layout.
+- **Buffer Control:** Captions remain in a fixed display region rather than forcing a rapid chat-style scroll.
+- **Font Scaling:** The audience page now includes `Small`, `Medium`, `Large`, and `Extra Large` text size options backed by CSS variables, while still allowing browser zoom up to **400%** without breaking the layout.
 
 ### Pulse & Feedback (Remote)
 
-- **ARIA Labels:** The "Pulse" slider is wrapped with descriptive labels (`aria-label="Presentation Pace Indicator"`) and provides real-time feedback of its value to the user.
-- **Haptic Feedback:** Where supported by the mobile browser, interaction triggers subtle haptics to confirm data transmission for users with visual impairments.
+- **Line Spacing:** The audience page includes `Standard` and `Wide` line spacing settings to support different reading preferences.
+- **Settings Persistence:** Theme, text size, and line spacing are stored locally on the audience device so each person can personalize their own view without affecting others.
 
 ---
 
@@ -53,7 +53,7 @@ We aim to meet or exceed **WCAG 2.2 Level AA** standards for all audience-facing
 We believe that **Accessibility should not require an Internet Connection.**
 
 - By hosting the server locally via "Internet Sharing," we ensure that users in "Dead Zones" or secure facilities still have access to live captions.
-- All assets (HTMX, CSS, Fonts) are served from the local Node.js server rather than CDNs to prevent "broken" accessibility features when offline.
+- Local-first deployments can serve all assets from the Node.js server to prevent "broken" accessibility features when offline. The current GitHub Pages mode still uses CDN-hosted HTMX and should be treated as a connected fallback until those assets are vendored locally.
 
 ---
 
@@ -76,10 +76,25 @@ We are always learning. If you encounter a barrier while using this tool, please
 
 ### Implementation Note
 
-To make this document "live," I recommend adding an **Accessibility Settings** menu to your `audience.html` that includes:
+To make this document live, AirScript includes an Accessibility Settings menu directly on the audience page in [public/index.html](public/index.html). It is a user preference control, not an accessibility overlay: it helps each attendee personalize how captions are displayed on their own device without claiming to repair inaccessible markup.
+
+The current implementation follows the direction described in these personalization references:
+
+- [User Personalization and Accessibility Best Practices](https://mgifford.github.io/ACCESSIBILITY.md/examples/USER_PERSONALIZATION_ACCESSIBILITY_BEST_PRACTICES.html)
+- [Light/Dark Mode Accessibility Best Practices](https://mgifford.github.io/ACCESSIBILITY.md/examples/LIGHT_DARK_MODE_ACCESSIBILITY_BEST_PRACTICES.html)
+
+The audience settings menu uses CSS variables plus HTMX event bindings for:
 
 - **Text Size:** `Small | Medium | Large | Extra Large`
-- **Theme:** `Dark | Light | High Contrast (Yellow/Black)`
+- **Theme:** `System | Light | Dark | High Contrast (Yellow/Black)`
 - **Line Spacing:** `Standard | Wide`
 
-**Would you like me to provide the CSS variables and HTMX code to make these toggles functional on the audience's phones?**
+The settings apply on-device and persist in local storage so each attendee can adjust the display independently. By default, theme selection follows the device or browser color preference until the attendee explicitly overrides it on the page.
+
+Contributor guidance for future personalization work:
+
+- Respect browser and OS preferences first, including `prefers-color-scheme`, `prefers-reduced-motion`, and forced-colors mode.
+- Keep all preference controls keyboard operable, screen-reader labeled, and announced through a live region when values change.
+- Preserve browser zoom and user assistive technology behavior rather than replacing them.
+- Add a clear reset path back to device defaults whenever more controls are introduced.
+- Verify all theme combinations continue to meet WCAG 2.2 AA contrast requirements.
