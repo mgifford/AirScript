@@ -41,7 +41,7 @@ jobs:
           DEMO_URL="${PAGES_BASE_URL}${DEMO_PATH}/"
 
           mkdir -p _site/${DEMO_PATH}
-          cp -R public/. _site/${DEMO_PATH}/
+          cp -R docs/. _site/${DEMO_PATH}/
 
           cat > _site/index.html <<EOF
           <!DOCTYPE html>

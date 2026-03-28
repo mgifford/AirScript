@@ -32,7 +32,7 @@ The root GitHub Pages URL redirects into the demo, but the `/demo/` path is the 
 
 ### 1. Static Browser Mode
 
-Host the contents of `public/` on GitHub Pages or any static host. In this mode:
+Host the contents of `docs/` on GitHub Pages or any static host. In this mode:
 
 - Speech recognition runs in the browser with the Web Speech API
 - Captions can stay on the speaker device with no backend
@@ -45,7 +45,7 @@ For this repository, the default public demo URL is:
 
 The canonical document URL is `https://mgifford.github.io/AirScript/demo/index.html`, but the shorter `/demo/` path is the one intended for QR codes and sharing.
 
-This repository includes a GitHub Actions workflow at [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml) that publishes the `public/` directory to GitHub Pages.
+This repository includes a GitHub Actions workflow at [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml) that publishes the `docs/` directory to GitHub Pages.
 
 Minimal GitHub Pages setup:
 
@@ -56,7 +56,7 @@ Minimal GitHub Pages setup:
 
 The workflow publishes a root redirect and places the actual static app under `demo/`. It also generates `site-config.js` from the repository owner and repository name so forks automatically get their own Pages URL without code edits.
 
-The static artifact includes [public/.nojekyll](public/.nojekyll) so GitHub Pages serves the folder as plain static content without Jekyll processing.
+The static artifact includes [docs/.nojekyll](docs/.nojekyll) so GitHub Pages serves the folder as plain static content without Jekyll processing.
 
 The speaker page also includes a browser-side QR fallback. If the locally generated `qr.png` is missing, it renders a QR code for the default GitHub Pages demo URL instead.
 

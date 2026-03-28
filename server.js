@@ -6,7 +6,7 @@ const fs = require('fs/promises');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 8000;
-const qrPath = path.join(__dirname, 'public', 'qr.png');
+const qrPath = path.join(__dirname, 'docs', 'qr.png');
 
 const state = {
   caption: 'Waiting for speaker...',
@@ -28,7 +28,7 @@ app.use((req, res, next) => {
 
   next();
 });
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'docs')));
 
 function escapeHtml(value) {
   return String(value)
