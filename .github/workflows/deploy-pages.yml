@@ -36,7 +36,7 @@ jobs:
         run: |
           set -eu
           OWNER=$(printf '%s' "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          REPO=$(printf '%s' "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
+          REPO="${{ github.event.repository.name }}"
           PAGES_BASE_URL="https://${OWNER}.github.io/${REPO}/"
           DEMO_URL="${PAGES_BASE_URL}${DEMO_PATH}/"
 

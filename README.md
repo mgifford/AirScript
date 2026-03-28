@@ -6,8 +6,8 @@ Privacy-first live captions with a browser-first transcription path. The default
 
 Start here if you want to see the app before reading the setup notes.
 
-- Live demo: `https://mgifford.github.io/airscript/demo/`
-- Canonical document URL: `https://mgifford.github.io/airscript/demo/index.html`
+- Live demo: `https://mgifford.github.io/AirScript/demo/`
+- Canonical document URL: `https://mgifford.github.io/AirScript/demo/index.html`
 
 The root GitHub Pages URL redirects into the demo, but the `/demo/` path is the main public entry point and the one intended for sharing and QR codes.
 
@@ -41,9 +41,9 @@ Host the contents of `public/` on GitHub Pages or any static host. In this mode:
 
 For this repository, the default public demo URL is:
 
-- `https://mgifford.github.io/airscript/demo/`
+- `https://mgifford.github.io/AirScript/demo/`
 
-The canonical document URL is `https://mgifford.github.io/airscript/demo/index.html`, but the shorter `/demo/` path is the one intended for QR codes and sharing.
+The canonical document URL is `https://mgifford.github.io/AirScript/demo/index.html`, but the shorter `/demo/` path is the one intended for QR codes and sharing.
 
 This repository includes a GitHub Actions workflow at [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml) that publishes the `public/` directory to GitHub Pages.
 
@@ -54,7 +54,7 @@ Minimal GitHub Pages setup:
 3. Set Build and deployment Source to GitHub Actions.
 4. Push to `main` or run the `Deploy GitHub Pages` workflow manually.
 
-The workflow publishes a root redirect and places the actual static app under `demo/`. It also generates `site-config.js` from the repository owner and repository name, lowercasing both so forks automatically get their own Pages URL without code edits.
+The workflow publishes a root redirect and places the actual static app under `demo/`. It also generates `site-config.js` from the repository owner and repository name so forks automatically get their own Pages URL without code edits.
 
 The static artifact includes [public/.nojekyll](public/.nojekyll) so GitHub Pages serves the folder as plain static content without Jekyll processing.
 

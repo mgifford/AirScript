@@ -8,6 +8,7 @@
   <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
   <script src="./site-config.js"></script>
   <script src="./app-config.js"></script>
+  <script src="./vendor/qrcode.js"></script>
   <style>
     :root {
       color-scheme: light dark;
@@ -134,6 +135,112 @@
 
     #settings-shell {
       padding: 1.25rem;
+    }
+
+    #start-shell {
+      padding: 1.5rem;
+    }
+
+    .hero-title {
+      margin-bottom: 0.3rem;
+    }
+
+    .hero-copy {
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 56rem;
+    }
+
+    .start-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: 1.15fr 0.85fr;
+      align-items: start;
+    }
+
+    .start-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .action-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0.8rem 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--control-border);
+      background: var(--accent);
+      color: #081018;
+      text-decoration: none;
+      font-weight: 800;
+    }
+
+    .action-link.secondary {
+      background: var(--control-bg);
+      color: var(--control-text);
+    }
+
+    .setup-list,
+    .status-list {
+      margin: 0;
+      padding-left: 1.25rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .url-card,
+    .status-card,
+    .qr-card {
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.32);
+    }
+
+    .url-card p,
+    .status-card p,
+    .qr-card p {
+      margin-bottom: 0.55rem;
+    }
+
+    .status-ok,
+    .status-warn {
+      font-weight: 800;
+    }
+
+    .status-ok {
+      color: var(--accent);
+    }
+
+    .status-warn {
+      color: #b45309;
+    }
+
+    body[data-theme="contrast"] .status-warn {
+      color: #fff200;
+    }
+
+    #start-qr {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 16rem;
+    }
+
+    #start-qr img {
+      width: min(100%, 15rem);
+      height: auto;
+      background: white;
+      border-radius: 1rem;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+    }
+
+    .mono-link {
+      overflow-wrap: anywhere;
     }
 
     .settings-grid {
@@ -306,6 +413,10 @@
         padding: 1rem;
       }
 
+      .start-grid {
+        grid-template-columns: 1fr;
+      }
+
       #caption-shell,
       #slide-shell {
         border-radius: 1.1rem;
@@ -315,6 +426,45 @@
 </head>
 <body>
   <main>
+    <section class="panel" id="start-shell">
+      <div class="stack">
+        <p class="eyebrow">Start Here</p>
+        <h1 class="hero-title">AirScript Demo</h1>
+        <p class="hero-copy">Open the speaker console on the presenter device, then share this demo URL or QR code with audience phones. This page also checks what this browser can support so people can tell quickly whether they are on a speaker-ready device or just an audience viewer.</p>
+        <div class="start-grid">
+          <div class="stack">
+            <div class="start-actions">
+              <a class="action-link" id="open-speaker-link" href="./speaker.html">Open Speaker Console</a>
+              <a class="action-link secondary mono-link" id="open-demo-link" href="./index.html">Open Canonical Demo URL</a>
+            </div>
+            <div class="url-card">
+              <p><strong>Audience demo URL</strong></p>
+              <p class="mono-link" id="demo-url-text"></p>
+              <p><strong>Canonical document URL</strong></p>
+              <p class="mono-link" id="demo-index-url-text"></p>
+            </div>
+            <div class="status-card">
+              <p><strong>Browser checks</strong></p>
+              <ul class="status-list" id="setup-status-list"></ul>
+            </div>
+            <div class="status-card">
+              <p><strong>Quick start</strong></p>
+              <ol class="setup-list">
+                <li>Open the speaker console on the device with the microphone.</li>
+                <li>Use Chrome or Edge there if you want browser-native speech capture.</li>
+                <li>Share this demo URL or let audience phones scan the QR code.</li>
+                <li>Add a relay URL later if you want cross-device live updates over SSE.</li>
+              </ol>
+            </div>
+          </div>
+          <div class="qr-card">
+            <p><strong>Audience QR code</strong></p>
+            <div id="start-qr" aria-live="polite"></div>
+            <p id="qr-help">Scan to open the audience demo on another device.</p>
+          </div>
+        </div>
+      </div>
+    </section>
     <section class="panel" id="settings-shell">
       <div class="stack">
         <p class="eyebrow">Accessibility Settings</p>
@@ -380,9 +530,17 @@
     const captionStream = document.getElementById('caption-stream');
     const slideStream = document.getElementById('slide-stream');
     const settingsAnnouncer = document.getElementById('settings-announcer');
+    const openSpeakerLink = document.getElementById('open-speaker-link');
+    const openDemoLink = document.getElementById('open-demo-link');
+    const demoUrlText = document.getElementById('demo-url-text');
+    const demoIndexUrlText = document.getElementById('demo-index-url-text');
+    const setupStatusList = document.getElementById('setup-status-list');
+    const startQr = document.getElementById('start-qr');
+    const qrHelp = document.getElementById('qr-help');
     const textSizeSelect = document.getElementById('text-size-select');
     const lineSpacingSelect = document.getElementById('line-spacing-select');
     const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    const speechRecognitionSupported = Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
     const defaultAudienceSettings = {
       theme: 'system',
       textSize: 'medium',
@@ -468,13 +626,93 @@
       window.htmx.process(document.body);
     }
 
+    function getDemoUrl() {
+      return siteConfig.demoUrl || new URL('./', window.location.href).toString();
+    }
+
+    function getDemoIndexUrl() {
+      return siteConfig.demoIndexUrl || new URL('index.html', getDemoUrl()).toString();
+    }
+
+    function getSpeakerUrl() {
+      return new URL('speaker.html', getDemoUrl()).toString();
+    }
+
+    function renderSetupQr(url) {
+      if (typeof window.qrcode !== 'function') {
+        startQr.textContent = url;
+        qrHelp.textContent = 'QR library unavailable in this browser. Copy the audience URL above.';
+        return;
+      }
+
+      const qr = window.qrcode(0, 'M');
+      qr.addData(url);
+      qr.make();
+      startQr.innerHTML = qr.createImgTag(6, 8, `QR code for ${url}`);
+      const qrImage = startQr.querySelector('img');
+      if (qrImage) {
+        qrImage.alt = `QR code for ${url}`;
+      }
+    }
+
+    function renderSetupChecks() {
+      const checks = [
+        {
+          ok: window.isSecureContext,
+          okLabel: 'Secure context is available on this page.',
+          warnLabel: 'This page is not in a secure context. Browser microphone capture usually requires HTTPS or localhost.'
+        },
+        {
+          ok: speechRecognitionSupported,
+          okLabel: 'This browser can act as a speaker device with the Web Speech API.',
+          warnLabel: 'This browser does not expose the Web Speech API. Use Chrome or Edge on the speaker device.'
+        },
+        {
+          ok: Boolean(config.streamUrl),
+          okLabel: 'A live relay stream is configured for this audience page.',
+          warnLabel: 'No relay stream is configured yet. This demo still works as a static audience page.'
+        },
+        {
+          ok: navigator.onLine,
+          okLabel: 'This device reports that it is online.',
+          warnLabel: 'This device reports that it is offline. Local relay mode can still work if the page is already loaded.'
+        }
+      ];
+
+      setupStatusList.innerHTML = '';
+      for (const check of checks) {
+        const item = document.createElement('li');
+        item.className = check.ok ? 'status-ok' : 'status-warn';
+        item.textContent = check.ok ? check.okLabel : check.warnLabel;
+        setupStatusList.appendChild(item);
+      }
+    }
+
+    function renderStartHere() {
+      const demoUrl = getDemoUrl();
+      const demoIndexUrl = getDemoIndexUrl();
+      const speakerUrl = getSpeakerUrl();
+
+      demoUrlText.textContent = demoUrl;
+      demoIndexUrlText.textContent = demoIndexUrl;
+      openDemoLink.href = demoIndexUrl;
+      openDemoLink.textContent = demoIndexUrl;
+      openSpeakerLink.href = speakerUrl;
+      renderSetupQr(demoUrl);
+      renderSetupChecks();
+    }
+
     applyAudienceSettings(audienceSettings);
+    renderStartHere();
 
     prefersDarkScheme.addEventListener('change', () => {
       if (audienceSettings.theme === 'system') {
         applyAudienceSettings(audienceSettings);
       }
     });
+
+    window.addEventListener('online', renderSetupChecks);
+    window.addEventListener('offline', renderSetupChecks);
 
     if (config.streamUrl) {
       connectStream(config.streamUrl);
