@@ -52,6 +52,109 @@
       box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
     }
 
+    .onboarding {
+      grid-column: 1 / -1;
+    }
+
+    .onboarding h1 {
+      margin-bottom: 0.45rem;
+    }
+
+    .onboarding-lead {
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 1rem;
+      max-width: 60rem;
+    }
+
+    .onboarding-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .start-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.9rem;
+    }
+
+    .action-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      border-radius: 999px;
+      padding: 0.75rem 1rem;
+      text-decoration: none;
+      font-weight: 800;
+      border: 1px solid var(--border);
+      background: var(--accent);
+      color: white;
+    }
+
+    .action-link.secondary {
+      background: white;
+      color: var(--ink);
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      background: rgba(255, 255, 255, 0.55);
+      padding: 0.9rem 1rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .card p {
+      margin-bottom: 0.4rem;
+    }
+
+    .mono {
+      overflow-wrap: anywhere;
+      font-family: "SF Mono", "Menlo", monospace;
+      font-size: 0.9rem;
+    }
+
+    .check-list,
+    .steps-list {
+      margin: 0;
+      padding-left: 1.25rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .check-ok,
+    .check-warn {
+      font-weight: 700;
+    }
+
+    .check-ok {
+      color: var(--accent-strong);
+    }
+
+    .check-warn {
+      color: #b45309;
+    }
+
+    #onboarding-qr-wrap {
+      min-height: 16rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #onboarding-qr-wrap img {
+      width: min(100%, 16rem);
+      height: auto;
+      background: white;
+      border-radius: 1rem;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+    }
+
     h1,
     h2,
     p {
@@ -178,6 +281,10 @@
         padding: 1rem;
       }
 
+      .onboarding-grid {
+        grid-template-columns: 1fr;
+      }
+
       main {
         grid-template-columns: 1fr;
       }
@@ -186,6 +293,42 @@
 </head>
 <body>
   <main>
+    <section class="panel onboarding">
+      <h1>Start Here</h1>
+      <p class="onboarding-lead">Use this page first when you are setting up a session. It gives the speaker launch path, audience URL, QR code, and quick browser checks before you start captions.</p>
+      <div class="onboarding-grid">
+        <div>
+          <div class="start-actions">
+            <a class="action-link" id="open-audience-link" href="./index.html">Open Audience Demo</a>
+            <a class="action-link secondary" id="open-speaker-canonical-link" href="./speaker.html">Open Canonical Speaker URL</a>
+          </div>
+          <div class="card">
+            <p><strong>Audience URL</strong></p>
+            <p class="mono" id="onboarding-audience-url"></p>
+            <p><strong>Speaker URL</strong></p>
+            <p class="mono" id="onboarding-speaker-url"></p>
+          </div>
+          <div class="card">
+            <p><strong>Browser checks</strong></p>
+            <ul class="check-list" id="onboarding-check-list"></ul>
+          </div>
+          <div class="card">
+            <p><strong>Quick setup</strong></p>
+            <ol class="steps-list">
+              <li>Open this speaker page on the device with the microphone.</li>
+              <li>Share the Audience URL or have attendees scan the QR code.</li>
+              <li>Click Start Captions and allow microphone permissions.</li>
+              <li>Set a relay URL if you want network-wide live SSE updates.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="card">
+          <p><strong>Audience QR code</strong></p>
+          <div id="onboarding-qr-wrap" aria-live="polite"></div>
+          <p id="onboarding-qr-note">Scan this from another device to open the audience page.</p>
+        </div>
+      </div>
+    </section>
     <section class="panel">
       <h1>Speaker Console</h1>
       <p>Use your browser microphone to transcribe speech locally and broadcast captions to the audience page.</p>
@@ -275,6 +418,13 @@
     const staticNotes = document.getElementById('static-notes');
     const audienceHelp = document.getElementById('audience-help');
     const qrImage = document.getElementById('qr-image');
+    const openAudienceLink = document.getElementById('open-audience-link');
+    const openSpeakerCanonicalLink = document.getElementById('open-speaker-canonical-link');
+    const onboardingAudienceUrl = document.getElementById('onboarding-audience-url');
+    const onboardingSpeakerUrl = document.getElementById('onboarding-speaker-url');
+    const onboardingCheckList = document.getElementById('onboarding-check-list');
+    const onboardingQrWrap = document.getElementById('onboarding-qr-wrap');
+    const onboardingQrNote = document.getElementById('onboarding-qr-note');
     const siteConfig = window.LocalSyncConfig.getSiteConfig();
 
     let recognition;
@@ -316,6 +466,14 @@
       return siteConfig.demoUrl || siteConfig.demoIndexUrl || window.location.href;
     }
 
+    function getCanonicalSpeakerUrl() {
+      if (siteConfig.demoUrl) {
+        return new URL('speaker.html', siteConfig.demoUrl).toString();
+      }
+
+      return new URL('speaker.html', window.location.href).toString();
+    }
+
     function getQrTargetUrl() {
       return composeAudienceUrl() || getDefaultStaticAudienceUrl();
     }
@@ -348,6 +506,76 @@
       audienceHelp.textContent = `Audience URL: ${qrTargetUrl}`;
     }
 
+    function renderOnboardingQr(url) {
+      onboardingQrWrap.innerHTML = '';
+
+      if (typeof window.qrcode !== 'function') {
+        onboardingQrWrap.textContent = url;
+        onboardingQrNote.textContent = 'QR generator unavailable in this browser. Copy the Audience URL above.';
+        return;
+      }
+
+      const qr = window.qrcode(0, 'M');
+      qr.addData(url);
+      qr.make();
+      onboardingQrWrap.innerHTML = qr.createImgTag(6, 8, `QR code for ${url}`);
+
+      const image = onboardingQrWrap.querySelector('img');
+      if (image) {
+        image.alt = `QR code for ${url}`;
+      }
+    }
+
+    function renderOnboardingChecks() {
+      const hasSpeechApi = Boolean(SpeechRecognition);
+      const mixedContentRisk = window.location.protocol === 'https:' && runtimeConfig.relayBaseUrl.startsWith('http://');
+
+      const checks = [
+        {
+          ok: window.isSecureContext,
+          okLabel: 'Secure context is available for browser microphone access.',
+          warnLabel: 'This page is not in a secure context. Use HTTPS or localhost for browser microphone access.'
+        },
+        {
+          ok: hasSpeechApi,
+          okLabel: 'Web Speech API is available in this browser.',
+          warnLabel: 'Web Speech API is not available. Use Chrome or Edge on the speaker device.'
+        },
+        {
+          ok: runtimeConfig.publishMode !== 'relay' || !mixedContentRisk,
+          okLabel: 'Current publish mode and relay URL are compatible with this page context.',
+          warnLabel: 'This page is HTTPS but the relay URL is HTTP. Browsers usually block mixed-content requests.'
+        },
+        {
+          ok: navigator.onLine,
+          okLabel: 'This device reports network connectivity.',
+          warnLabel: 'This device reports offline status. Local mode can still run if resources are already loaded.'
+        }
+      ];
+
+      onboardingCheckList.innerHTML = '';
+      for (const check of checks) {
+        const item = document.createElement('li');
+        item.className = check.ok ? 'check-ok' : 'check-warn';
+        item.textContent = check.ok ? check.okLabel : check.warnLabel;
+        onboardingCheckList.appendChild(item);
+      }
+    }
+
+    function refreshOnboardingUi() {
+      const audienceUrl = getQrTargetUrl();
+      const speakerUrl = getCanonicalSpeakerUrl();
+
+      onboardingAudienceUrl.textContent = audienceUrl;
+      onboardingSpeakerUrl.textContent = speakerUrl;
+      openAudienceLink.href = audienceUrl;
+      openSpeakerCanonicalLink.href = speakerUrl;
+      openSpeakerCanonicalLink.textContent = speakerUrl;
+
+      renderOnboardingQr(audienceUrl);
+      renderOnboardingChecks();
+    }
+
     function refreshConfigUi() {
       const providerDefinition = window.LocalSyncProviders.getProviderDefinition(runtimeConfig.provider);
       providerSelect.value = runtimeConfig.provider;
@@ -375,6 +603,8 @@
       staticNotes.textContent = mixedContentRisk
         ? 'This page is on HTTPS and the relay is HTTP. Browsers usually block that as mixed content. Use the local Express server directly or expose the relay over HTTPS.'
         : `GitHub Pages works well for browser-only transcription. Default demo URL: ${siteConfig.demoUrl || 'not set'}. If the local relay QR image is missing, this page generates a fallback QR for the static demo URL. For audience broadcasting, point this page at a relay that supports POST /update and GET /stream.`;
+
+      refreshOnboardingUi();
     }
 
     function applyConfig(nextConfig) {
@@ -508,6 +738,14 @@
 
     qrImage.addEventListener('error', () => {
       renderFallbackQr();
+    });
+
+    window.addEventListener('online', () => {
+      refreshOnboardingUi();
+    });
+
+    window.addEventListener('offline', () => {
+      refreshOnboardingUi();
     });
 
     clearButton.addEventListener('click', async () => {
