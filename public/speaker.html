@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LocalSync Speaker Console</title>
+  <script src="./site-config.js"></script>
   <script src="./app-config.js"></script>
   <script src="./provider-adapters.js"></script>
+  <script src="./vendor/qrcode.js"></script>
   <style>
     :root {
       color-scheme: light;
@@ -273,11 +275,12 @@
     const staticNotes = document.getElementById('static-notes');
     const audienceHelp = document.getElementById('audience-help');
     const qrImage = document.getElementById('qr-image');
+    const siteConfig = window.LocalSyncConfig.getSiteConfig();
 
     let recognition;
     let currentText = '';
     let runtimeConfig = window.LocalSyncConfig.loadConfig();
-  let providerSession;
+    let providerSession;
 
     function setStatus(message, isError = false) {
       status.textContent = message;
@@ -309,6 +312,42 @@
       return '';
     }
 
+    function getDefaultStaticAudienceUrl() {
+      return siteConfig.demoUrl || siteConfig.demoIndexUrl || window.location.href;
+    }
+
+    function getQrTargetUrl() {
+      return composeAudienceUrl() || getDefaultStaticAudienceUrl();
+    }
+
+    function renderFallbackQr() {
+      const qrTargetUrl = getQrTargetUrl();
+
+      if (typeof window.qrcode !== 'function') {
+        audienceHelp.textContent = `Audience URL: ${qrTargetUrl}`;
+        return;
+      }
+
+      const qr = window.qrcode(0, 'M');
+      qr.addData(qrTargetUrl);
+      qr.make();
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'qr';
+      wrapper.setAttribute('role', 'img');
+      wrapper.setAttribute('aria-label', `QR code for ${qrTargetUrl}`);
+      wrapper.innerHTML = qr.createImgTag(6, 8, `QR code for ${qrTargetUrl}`);
+
+      const renderedImage = wrapper.querySelector('img');
+      if (renderedImage) {
+        renderedImage.className = 'qr';
+        renderedImage.alt = `QR code for ${qrTargetUrl}`;
+      }
+
+      qrImage.replaceWith(wrapper);
+      audienceHelp.textContent = `Audience URL: ${qrTargetUrl}`;
+    }
+
     function refreshConfigUi() {
       const providerDefinition = window.LocalSyncProviders.getProviderDefinition(runtimeConfig.provider);
       providerSelect.value = runtimeConfig.provider;
@@ -330,12 +369,12 @@
       const audienceUrl = composeAudienceUrl();
       audienceHelp.textContent = audienceUrl
         ? `Audience URL: ${audienceUrl}`
-        : 'No relay is configured. In this mode, captions stay on this device and no audience stream is published.';
+        : `Default static audience URL: ${getDefaultStaticAudienceUrl()}`;
 
       const mixedContentRisk = window.location.protocol === 'https:' && runtimeConfig.relayBaseUrl.startsWith('http://');
       staticNotes.textContent = mixedContentRisk
         ? 'This page is on HTTPS and the relay is HTTP. Browsers usually block that as mixed content. Use the local Express server directly or expose the relay over HTTPS.'
-        : 'GitHub Pages works well for browser-only transcription. For audience broadcasting, point this page at a relay that supports POST /update and GET /stream.';
+        : `GitHub Pages works well for browser-only transcription. Default demo URL: ${siteConfig.demoUrl || 'not set'}. If the local relay QR image is missing, this page generates a fallback QR for the static demo URL. For audience broadcasting, point this page at a relay that supports POST /update and GET /stream.`;
     }
 
     function applyConfig(nextConfig) {
@@ -468,7 +507,7 @@
     });
 
     qrImage.addEventListener('error', () => {
-      qrImage.hidden = true;
+      renderFallbackQr();
     });
 
     clearButton.addEventListener('click', async () => {

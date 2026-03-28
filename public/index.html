@@ -6,6 +6,7 @@
   <title>LocalSync Captions</title>
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
   <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
+  <script src="./site-config.js"></script>
   <script src="./app-config.js"></script>
   <style>
     :root {
@@ -152,6 +153,7 @@
   </main>
   <script>
     const config = window.LocalSyncConfig.loadConfig();
+    const siteConfig = window.LocalSyncConfig.getSiteConfig();
     const connectionNote = document.getElementById('connection-note');
     const captionStream = document.getElementById('caption-stream');
     const slideStream = document.getElementById('slide-stream');
@@ -168,7 +170,8 @@
     } else {
       captionStream.removeAttribute('sse-swap');
       slideStream.removeAttribute('sse-swap');
-      connectionNote.innerHTML = 'No stream is configured. On GitHub Pages, open this page with <code>?relay=https://your-relay-host</code> or <code>?stream=https://your-relay-host/stream</code>.';
+      const defaultUrl = siteConfig.demoUrl || window.location.href;
+      connectionNote.innerHTML = `No stream is configured. Default static URL: <code>${defaultUrl}</code>. Add <code>?relay=https://your-relay-host</code> or <code>?stream=https://your-relay-host/stream</code> when you want live audience updates.`;
     }
   </script>
 </body>

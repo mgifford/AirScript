@@ -19,6 +19,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      DEMO_PATH: demo
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,10 +29,50 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
+      - name: Build Pages artifact
+        run: |
+          set -eu
+          OWNER=$(printf '%s' "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          REPO=$(printf '%s' "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
+          PAGES_BASE_URL="https://${OWNER}.github.io/${REPO}/"
+          DEMO_URL="${PAGES_BASE_URL}${DEMO_PATH}/"
+
+          mkdir -p _site/${DEMO_PATH}
+          cp -R public/. _site/${DEMO_PATH}/
+
+          cat > _site/index.html <<EOF
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta http-equiv="refresh" content="0; url=./${DEMO_PATH}/">
+            <link rel="canonical" href="./${DEMO_PATH}/">
+            <title>Redirecting to demo</title>
+          </head>
+          <body>
+            <p>Redirecting to <a href="./${DEMO_PATH}/">./${DEMO_PATH}/</a></p>
+          </body>
+          </html>
+          EOF
+
+          cat > _site/${DEMO_PATH}/site-config.js <<EOF
+          (function () {
+            window.AirScriptSiteConfig = {
+              repoOwner: '${OWNER}',
+              repoName: '${REPO}',
+              demoPath: '${DEMO_PATH}',
+              pagesBaseUrl: '${PAGES_BASE_URL}',
+              demoUrl: '${DEMO_URL}',
+              demoIndexUrl: '${DEMO_URL}index.html',
+              generatedBy: 'github-actions'
+            };
+          })();
+          EOF
+
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: public
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment

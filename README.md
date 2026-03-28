@@ -7,6 +7,8 @@ Privacy-first live captions with a browser-first transcription path. The default
 - Web Speech API as the default Phase 1 transcription engine
 - Provider adapter layer for selecting Web Speech or an HTTPS speech/LLM service
 - Static-friendly speaker and audience pages that can be hosted on GitHub Pages
+- Default GitHub Pages publish path at `/demo/`, with fork-friendly URL generation
+- Client-side QR fallback for the static Pages demo URL when the local relay QR is unavailable
 - Optional relay mode for local Express broadcasting over Wi-Fi or Internet Sharing
 - Audience page using HTMX SSE for near real-time updates when a relay is configured
 - Optional bearer-token support for compatible third-party relay endpoints
@@ -28,6 +30,12 @@ Host the contents of `public/` on GitHub Pages or any static host. In this mode:
 - HTMX stays in place on the audience page and connects only when you supply a relay stream URL
 - You can optionally point the speaker page at a compatible relay endpoint later
 
+For this repository, the default public demo URL is:
+
+- `https://mgifford.github.io/airscript/demo/`
+
+The canonical document URL is `https://mgifford.github.io/airscript/demo/index.html`, but the shorter `/demo/` path is the one intended for QR codes and sharing.
+
 This repository includes a GitHub Actions workflow at [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml) that publishes the `public/` directory to GitHub Pages.
 
 Minimal GitHub Pages setup:
@@ -37,7 +45,11 @@ Minimal GitHub Pages setup:
 3. Set Build and deployment Source to GitHub Actions.
 4. Push to `main` or run the `Deploy GitHub Pages` workflow manually.
 
+The workflow publishes a root redirect and places the actual static app under `demo/`. It also generates `site-config.js` from the repository owner and repository name, lowercasing both so forks automatically get their own Pages URL without code edits.
+
 The static artifact includes [public/.nojekyll](public/.nojekyll) so GitHub Pages serves the folder as plain static content without Jekyll processing.
+
+The speaker page also includes a browser-side QR fallback. If the locally generated `qr.png` is missing, it renders a QR code for the default GitHub Pages demo URL instead.
 
 ### 2. Local Relay Mode
 

@@ -1,6 +1,7 @@
 (function () {
   const STORAGE_KEY = 'localsync-config';
   const SESSION_API_KEY = 'localsync-api-key';
+  const siteConfig = window.AirScriptSiteConfig || {};
 
   function isGithubPagesHost(hostname) {
     return hostname.endsWith('github.io');
@@ -108,6 +109,17 @@
     return headers;
   }
 
+  function getSiteConfig() {
+    return {
+      demoPath: siteConfig.demoPath || 'demo',
+      pagesBaseUrl: siteConfig.pagesBaseUrl || '',
+      demoUrl: siteConfig.demoUrl || '',
+      demoIndexUrl: siteConfig.demoIndexUrl || '',
+      repoOwner: siteConfig.repoOwner || '',
+      repoName: siteConfig.repoName || ''
+    };
+  }
+
   window.LocalSyncConfig = {
     STORAGE_KEY,
     SESSION_API_KEY,
@@ -116,6 +128,7 @@
     isLocalLikeHost,
     loadConfig,
     saveConfig,
-    publishHeaders
+    publishHeaders,
+    getSiteConfig
   };
 })();
