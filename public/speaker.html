@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LocalSync Speaker Console</title>
+  <script src="./app-config.js"></script>
+  <script src="./provider-adapters.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: linear-gradient(160deg, #f8fafc 0%, #e0f2fe 45%, #fefce8 100%);
+      --ink: #0f172a;
+      --muted: #475569;
+      --accent: #0f766e;
+      --accent-strong: #115e59;
+      --panel: rgba(255, 255, 255, 0.8);
+      --border: rgba(15, 23, 42, 0.12);
+      --error: #b91c1c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      padding: 2rem;
+    }
+
+    main {
+      width: min(100%, 72rem);
+      margin: 0 auto;
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: 1.2fr 0.8fr;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+    }
+
+    h1,
+    h2,
+    p {
+      margin-top: 0;
+    }
+
+    .controls {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 0.85rem 1.25rem;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--accent);
+      color: white;
+    }
+
+    button.secondary {
+      background: white;
+      color: var(--ink);
+      border: 1px solid var(--border);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    #status {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    #status.error {
+      color: var(--error);
+    }
+
+    #transcript {
+      min-height: 16rem;
+      border-radius: 1rem;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.85);
+      padding: 1rem;
+      font-size: 1.15rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .settings {
+      display: grid;
+      gap: 0.9rem;
+      margin-top: 1.25rem;
+    }
+
+    label {
+      display: grid;
+      gap: 0.4rem;
+      font-weight: 700;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border-radius: 0.85rem;
+      border: 1px solid var(--border);
+      padding: 0.8rem 0.9rem;
+      font: inherit;
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--ink);
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .provider-grid {
+      display: grid;
+      gap: 0.9rem;
+    }
+
+    .provider-advanced[hidden] {
+      display: none;
+    }
+
+    .summary {
+      border: 1px dashed var(--border);
+      border-radius: 1rem;
+      padding: 0.85rem 1rem;
+      background: rgba(255, 255, 255, 0.55);
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .meta {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .qr {
+      width: min(100%, 18rem);
+      border-radius: 1rem;
+      background: white;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+    }
+
+    code {
+      font-family: "SF Mono", "Menlo", monospace;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        padding: 1rem;
+      }
+
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="panel">
+      <h1>Speaker Console</h1>
+      <p>Use your browser microphone to transcribe speech locally and broadcast captions to the audience page.</p>
+      <div class="controls">
+        <button id="start-button" type="button">Start Captions</button>
+        <button class="secondary" id="stop-button" type="button" disabled>Stop</button>
+        <button class="secondary" id="clear-button" type="button">Clear</button>
+      </div>
+      <p id="status">Checking browser speech recognition support...</p>
+      <div id="transcript">Speech transcript will appear here.</div>
+      <form class="settings" id="settings-form">
+        <label>
+          Transcription Engine
+          <select id="provider-select"></select>
+        </label>
+        <p class="hint" id="provider-details"></p>
+        <div class="provider-grid provider-advanced" id="provider-advanced" hidden>
+          <label>
+            HTTPS Provider Endpoint
+            <input id="provider-endpoint" type="url" placeholder="https://api.example.com/captions">
+          </label>
+          <label>
+            Response Field
+            <input id="provider-response-field" type="text" placeholder="text">
+          </label>
+          <label>
+            Optional Provider Prompt
+            <input id="provider-prompt" type="text" placeholder="Clean up filler words and return captions only">
+          </label>
+        </div>
+        <label>
+          Publish Mode
+          <select id="publish-mode-select">
+            <option value="local-only">Local preview only</option>
+            <option value="relay">POST captions to a relay endpoint</option>
+          </select>
+        </label>
+        <label>
+          Relay Base URL
+          <input id="relay-base-url" type="url" placeholder="https://relay.example.com or http://192.168.2.1:8000">
+        </label>
+        <label>
+          Optional API Key
+          <input id="api-key" type="password" placeholder="Stored only for this browser session">
+        </label>
+        <div class="controls">
+          <button type="submit">Save Settings</button>
+        </div>
+        <p class="hint">Default behavior is fully in-browser with the Web Speech API. Relay publishing is optional and intended for local Express servers or compatible third-party endpoints.</p>
+        <div class="summary" id="mode-summary"></div>
+      </form>
+    </section>
+    <aside class="meta">
+      <section class="panel">
+        <h2>Audience Join</h2>
+        <p id="audience-help">Have attendees connect to the same Wi-Fi network, then scan this QR code.</p>
+        <img class="qr" id="qr-image" src="./qr.png" alt="QR code for the LocalSync Captions audience page">
+      </section>
+      <section class="panel">
+        <h2>Static-First Notes</h2>
+        <p id="static-notes">GitHub Pages can host the speaker UI and audience UI, but local HTTP relay targets may be blocked from an HTTPS page by mixed-content rules.</p>
+      </section>
+      <section class="panel">
+        <h2>Phase 3 Hook</h2>
+        <p>The relay server exposes <code>POST /slides</code> so slide HTML can be broadcast alongside captions over SSE when you run the local Node server.</p>
+      </section>
+    </aside>
+  </main>
+  <script>
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const startButton = document.getElementById('start-button');
+    const stopButton = document.getElementById('stop-button');
+    const clearButton = document.getElementById('clear-button');
+    const status = document.getElementById('status');
+    const transcript = document.getElementById('transcript');
+    const settingsForm = document.getElementById('settings-form');
+    const providerSelect = document.getElementById('provider-select');
+    const providerDetails = document.getElementById('provider-details');
+    const providerAdvanced = document.getElementById('provider-advanced');
+    const providerEndpointInput = document.getElementById('provider-endpoint');
+    const providerResponseFieldInput = document.getElementById('provider-response-field');
+    const providerPromptInput = document.getElementById('provider-prompt');
+    const publishModeSelect = document.getElementById('publish-mode-select');
+    const relayBaseUrlInput = document.getElementById('relay-base-url');
+    const apiKeyInput = document.getElementById('api-key');
+    const modeSummary = document.getElementById('mode-summary');
+    const staticNotes = document.getElementById('static-notes');
+    const audienceHelp = document.getElementById('audience-help');
+    const qrImage = document.getElementById('qr-image');
+
+    let recognition;
+    let currentText = '';
+    let runtimeConfig = window.LocalSyncConfig.loadConfig();
+  let providerSession;
+
+    function setStatus(message, isError = false) {
+      status.textContent = message;
+      status.classList.toggle('error', isError);
+    }
+
+    function populateProviderOptions() {
+      providerSelect.innerHTML = '';
+
+      for (const provider of window.LocalSyncProviders.listProviders()) {
+        const option = document.createElement('option');
+        option.value = provider.id;
+        option.textContent = provider.label;
+        providerSelect.appendChild(option);
+      }
+    }
+
+    function composeAudienceUrl() {
+      if (runtimeConfig.publishMode === 'relay' && runtimeConfig.relayBaseUrl && window.LocalSyncConfig.isLocalLikeHost(window.location.hostname)) {
+        return runtimeConfig.relayBaseUrl;
+      }
+
+      if (runtimeConfig.publishMode === 'relay' && runtimeConfig.relayBaseUrl) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('relay', runtimeConfig.relayBaseUrl);
+        return url.toString();
+      }
+
+      return '';
+    }
+
+    function refreshConfigUi() {
+      const providerDefinition = window.LocalSyncProviders.getProviderDefinition(runtimeConfig.provider);
+      providerSelect.value = runtimeConfig.provider;
+      providerDetails.textContent = providerDefinition.details;
+      providerAdvanced.hidden = runtimeConfig.provider !== 'https-json';
+      providerEndpointInput.value = runtimeConfig.providerEndpoint || '';
+      providerResponseFieldInput.value = runtimeConfig.providerResponseField || 'text';
+      providerPromptInput.value = runtimeConfig.providerPrompt || '';
+      publishModeSelect.value = runtimeConfig.publishMode;
+      relayBaseUrlInput.value = runtimeConfig.relayBaseUrl;
+      apiKeyInput.value = runtimeConfig.apiKey;
+
+      const destination = runtimeConfig.publishMode === 'relay' && runtimeConfig.updateUrl
+        ? runtimeConfig.updateUrl
+        : 'local preview only';
+
+      modeSummary.textContent = `Provider: ${providerDefinition.label}. Publish destination: ${destination}.`;
+
+      const audienceUrl = composeAudienceUrl();
+      audienceHelp.textContent = audienceUrl
+        ? `Audience URL: ${audienceUrl}`
+        : 'No relay is configured. In this mode, captions stay on this device and no audience stream is published.';
+
+      const mixedContentRisk = window.location.protocol === 'https:' && runtimeConfig.relayBaseUrl.startsWith('http://');
+      staticNotes.textContent = mixedContentRisk
+        ? 'This page is on HTTPS and the relay is HTTP. Browsers usually block that as mixed content. Use the local Express server directly or expose the relay over HTTPS.'
+        : 'GitHub Pages works well for browser-only transcription. For audience broadcasting, point this page at a relay that supports POST /update and GET /stream.';
+    }
+
+    function applyConfig(nextConfig) {
+      runtimeConfig = {
+        ...nextConfig,
+        updateUrl: window.LocalSyncConfig.buildEndpoint(nextConfig.relayBaseUrl, '/update'),
+        slidesUrl: window.LocalSyncConfig.buildEndpoint(nextConfig.relayBaseUrl, '/slides'),
+        streamUrl: nextConfig.streamUrl || window.LocalSyncConfig.buildEndpoint(nextConfig.relayBaseUrl, '/stream')
+      };
+
+      window.LocalSyncConfig.saveConfig(runtimeConfig);
+      refreshConfigUi();
+    }
+
+    async function sendCaption(text) {
+      if (runtimeConfig.publishMode !== 'relay' || !runtimeConfig.updateUrl) {
+        return;
+      }
+
+      const response = await fetch(runtimeConfig.updateUrl, {
+        method: 'POST',
+        mode: 'cors',
+        headers: window.LocalSyncConfig.publishHeaders(runtimeConfig.apiKey),
+        body: JSON.stringify({
+          text,
+          source: runtimeConfig.provider,
+          timestamp: new Date().toISOString()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+    }
+
+    function updateTranscript(text) {
+      transcript.textContent = text || 'Speech transcript will appear here.';
+    }
+
+    function enableControls(isRunning) {
+      startButton.disabled = isRunning;
+      stopButton.disabled = !isRunning;
+    }
+
+    function rebuildProviderSession() {
+      if (providerSession) {
+        providerSession.destroy();
+        providerSession = undefined;
+      }
+
+      recognition = undefined;
+
+      try {
+        providerSession = window.LocalSyncProviders.createProviderSession(runtimeConfig, {
+          onStart(info) {
+            enableControls(true);
+            const action = runtimeConfig.publishMode === 'relay' ? 'publishing to relay' : 'local preview only';
+            setStatus(`Listening with ${info.label} and ${action}.`);
+          },
+          onStop() {
+            enableControls(false);
+            setStatus('Microphone stopped. You can restart captions.');
+          },
+          onStatus(message) {
+            setStatus(message);
+          },
+          onError(error) {
+            enableControls(false);
+            setStatus(error.message, true);
+          },
+          async onCaption(text) {
+            currentText = text;
+            updateTranscript(currentText);
+
+            try {
+              await sendCaption(currentText);
+            } catch (error) {
+              setStatus(`Failed to publish caption: ${error.message}`, true);
+            }
+          }
+        });
+      } catch (error) {
+        setStatus(error.message, true);
+        startButton.disabled = true;
+      }
+    }
+
+    startButton.addEventListener('click', async () => {
+      try {
+        if (!providerSession) {
+          rebuildProviderSession();
+        }
+
+        providerSession.start();
+      } catch (error) {
+        setStatus(`Unable to start speech recognition: ${error.message}`, true);
+      }
+    });
+
+    stopButton.addEventListener('click', () => {
+      if (providerSession) {
+        providerSession.stop();
+      }
+    });
+
+    providerSelect.addEventListener('change', () => {
+      providerAdvanced.hidden = providerSelect.value !== 'https-json';
+      const providerDefinition = window.LocalSyncProviders.getProviderDefinition(providerSelect.value);
+      providerDetails.textContent = providerDefinition.details;
+    });
+
+    settingsForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      applyConfig({
+        provider: providerSelect.value,
+        providerEndpoint: providerEndpointInput.value.trim(),
+        providerResponseField: providerResponseFieldInput.value.trim() || 'text',
+        providerPrompt: providerPromptInput.value.trim(),
+        publishMode: publishModeSelect.value,
+        relayBaseUrl: relayBaseUrlInput.value.trim().replace(/\/$/, ''),
+        streamUrl: '',
+        apiKey: apiKeyInput.value.trim()
+      });
+
+      startButton.disabled = false;
+      rebuildProviderSession();
+
+      setStatus('Settings saved. The selected provider is ready.');
+    });
+
+    qrImage.addEventListener('error', () => {
+      qrImage.hidden = true;
+    });
+
+    clearButton.addEventListener('click', async () => {
+      currentText = '';
+      updateTranscript(currentText);
+
+      try {
+        await sendCaption('');
+        setStatus('Caption cleared.');
+      } catch (error) {
+        setStatus(`Failed to clear caption: ${error.message}`, true);
+      }
+    });
+
+    populateProviderOptions();
+    refreshConfigUi();
+    rebuildProviderSession();
+  </script>
+</body>
+</html>

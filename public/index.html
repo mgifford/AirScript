@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LocalSync Captions</title>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
+  <script src="./app-config.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: radial-gradient(circle at top, #16314b 0%, #06111c 45%, #02050a 100%);
+      --panel: rgba(6, 17, 28, 0.8);
+      --text: #f8fafc;
+      --muted: #bfd4e5;
+      --accent: #fde047;
+      --border: rgba(191, 212, 229, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: ui-rounded, "Avenir Next", "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 5vw;
+    }
+
+    main {
+      width: min(100%, 64rem);
+      margin: 0 auto;
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .stack {
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 1.5rem;
+      -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.78rem;
+      margin: 0 0 0.75rem;
+    }
+
+    #caption-shell {
+      padding: 1.5rem;
+      min-height: 42vh;
+      display: flex;
+      align-items: center;
+    }
+
+    #display {
+      font-size: clamp(2rem, 7vw, 5.5rem);
+      font-weight: 800;
+      line-height: 1.08;
+      overflow-wrap: anywhere;
+    }
+
+    #slide-shell {
+      padding: 1.25rem;
+      min-height: 22vh;
+    }
+
+    #slide-display {
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      line-height: 1.5;
+    }
+
+    .slide-placeholder {
+      border: 1px dashed var(--border);
+      border-radius: 1rem;
+      padding: 1rem;
+    }
+
+    #connection-note {
+      color: var(--muted);
+      font-size: 0.98rem;
+      line-height: 1.5;
+    }
+
+    code {
+      font-family: "SF Mono", "Menlo", monospace;
+      font-size: 0.92rem;
+    }
+
+    .fade-in {
+      animation: fade-in 220ms ease-out;
+    }
+
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 1rem;
+      }
+
+      #caption-shell,
+      #slide-shell {
+        border-radius: 1.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="panel" id="caption-shell">
+      <div class="stack">
+        <p class="eyebrow">Live Captions</p>
+        <p id="connection-note">Waiting for a configured caption stream.</p>
+        <div id="caption-stream" sse-swap="caption-update">
+          <div id="display" class="caption-text">Waiting for speaker...</div>
+        </div>
+      </div>
+    </section>
+    <section class="panel" id="slide-shell">
+      <p class="eyebrow">Slides</p>
+      <div id="slide-stream" sse-swap="slide-change">
+        <div id="slide-display" class="slide-frame">
+          <section class="slide-placeholder">Slides are not live yet.</section>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script>
+    const config = window.LocalSyncConfig.loadConfig();
+    const connectionNote = document.getElementById('connection-note');
+    const captionStream = document.getElementById('caption-stream');
+    const slideStream = document.getElementById('slide-stream');
+
+    function connectStream(streamUrl) {
+      document.body.setAttribute('hx-ext', 'sse');
+      document.body.setAttribute('sse-connect', streamUrl);
+      window.htmx.process(document.body);
+    }
+
+    if (config.streamUrl) {
+      connectStream(config.streamUrl);
+      connectionNote.innerHTML = `Connected to <code>${config.streamUrl}</code>.`;
+    } else {
+      captionStream.removeAttribute('sse-swap');
+      slideStream.removeAttribute('sse-swap');
+      connectionNote.innerHTML = 'No stream is configured. On GitHub Pages, open this page with <code>?relay=https://your-relay-host</code> or <code>?stream=https://your-relay-host/stream</code>.';
+    }
+  </script>
+</body>
+</html>
