@@ -2,6 +2,15 @@
 
 Privacy-first live captions with a browser-first transcription path. The default engine is the Web Speech API running entirely in the browser, which means the UI can be hosted as static files, including on GitHub Pages. HTMX remains the delivery layer for audience updates when a relay stream is present. When you want shared audience captions, a local or remote relay can be added without changing the default capture flow.
 
+## Try The Demo
+
+Start here if you want to see the app before reading the setup notes.
+
+- Live demo: `https://mgifford.github.io/airscript/demo/`
+- Canonical document URL: `https://mgifford.github.io/airscript/demo/index.html`
+
+The root GitHub Pages URL redirects into the demo, but the `/demo/` path is the main public entry point and the one intended for sharing and QR codes.
+
 ## Features
 
 - Web Speech API as the default Phase 1 transcription engine
