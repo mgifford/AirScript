@@ -631,14 +631,20 @@
 
       if (!runtimeConfig.audienceUrlOverride && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
         onboardingQrNote.textContent = 'This page is opened on localhost, so QR may not work for other devices. Open speaker with your LAN IP or set Audience URL Override.';
+      } else if (window.LocalSyncConfig.isGithubPagesHost(window.location.hostname) && !runtimeConfig.audienceUrlOverride) {
+        onboardingQrNote.textContent = 'This is GitHub Pages static hosting. For a real room demo, run local server on your laptop and use a LAN URL (for example http://192.168.x.x:8000/demo/), or set Audience URL Override.';
       } else {
         onboardingQrNote.textContent = 'Scan this from another device to open the audience page.';
       }
 
       const mixedContentRisk = window.location.protocol === 'https:' && runtimeConfig.relayBaseUrl.startsWith('http://');
-      staticNotes.textContent = mixedContentRisk
-        ? 'This page is on HTTPS and the relay is HTTP. Browsers usually block that as mixed content. Use the local Express server directly or expose the relay over HTTPS.'
-        : `GitHub Pages works well for browser-only transcription. Default demo URL: ${siteConfig.demoUrl || 'not set'}. If the local relay QR image is missing, this page generates a fallback QR for the static demo URL. For audience broadcasting, point this page at a relay that supports POST /update and GET /stream.`;
+      if (window.LocalSyncConfig.isGithubPagesHost(window.location.hostname) && !runtimeConfig.audienceUrlOverride) {
+        staticNotes.textContent = 'You are on GitHub Pages static hosting. Live audience updates for a room cannot be demonstrated here by default. Run local server on your laptop and open speaker and audience from the same LAN host (for example http://192.168.x.x:8000), or provide Audience URL Override.';
+      } else {
+        staticNotes.textContent = mixedContentRisk
+          ? 'This page is on HTTPS and the relay is HTTP. Browsers usually block that as mixed content. Use the local Express server directly or expose the relay over HTTPS.'
+          : `GitHub Pages works well for browser-only transcription. Default demo URL: ${siteConfig.demoUrl || 'not set'}. If the local relay QR image is missing, this page generates a fallback QR for the static demo URL. For audience broadcasting, point this page at a relay that supports POST /update and GET /stream.`;
+      }
 
       refreshOnboardingUi();
     }
