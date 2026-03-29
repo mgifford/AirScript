@@ -463,6 +463,8 @@
             <p><strong>Audience QR code</strong></p>
             <div id="start-qr" aria-live="polite"></div>
             <p id="qr-help">Scan to open the audience demo on another device.</p>
+            <p><strong>QR target URL</strong></p>
+            <p class="mono-link" id="start-qr-url"></p>
           </div>
         </div>
       </div>
@@ -539,6 +541,7 @@
     const setupStatusList = document.getElementById('setup-status-list');
     const startQr = document.getElementById('start-qr');
     const qrHelp = document.getElementById('qr-help');
+    const startQrUrl = document.getElementById('start-qr-url');
     const textSizeSelect = document.getElementById('text-size-select');
     const lineSpacingSelect = document.getElementById('line-spacing-select');
     const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
@@ -641,6 +644,8 @@
     }
 
     function renderSetupQr(url) {
+      startQrUrl.textContent = url;
+
       if (typeof window.qrcode !== 'function') {
         startQr.textContent = url;
         qrHelp.textContent = 'QR library unavailable in this browser. Copy the audience URL above.';

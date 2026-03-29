@@ -328,6 +328,8 @@
           <p><strong>Audience QR code</strong></p>
           <div id="onboarding-qr-wrap" aria-live="polite"></div>
           <p id="onboarding-qr-note">Scan this from another device to open the audience page.</p>
+          <p><strong>QR target URL</strong></p>
+          <p class="mono" id="onboarding-qr-url"></p>
         </div>
       </div>
     </section>
@@ -388,6 +390,8 @@
         <h2>Audience Join</h2>
         <p id="audience-help">Have attendees connect to the same Wi-Fi network, then scan this QR code.</p>
         <img class="qr" id="qr-image" src="./qr.png" alt="QR code for the LocalSync Captions audience page">
+        <p><strong>QR target URL</strong></p>
+        <p class="mono" id="audience-qr-url"></p>
       </section>
       <section class="panel">
         <h2>Static-First Notes</h2>
@@ -427,6 +431,8 @@
     const onboardingCheckList = document.getElementById('onboarding-check-list');
     const onboardingQrWrap = document.getElementById('onboarding-qr-wrap');
     const onboardingQrNote = document.getElementById('onboarding-qr-note');
+    const onboardingQrUrl = document.getElementById('onboarding-qr-url');
+    const audienceQrUrl = document.getElementById('audience-qr-url');
     const siteConfig = window.LocalSyncConfig.getSiteConfig();
 
     let recognition;
@@ -482,6 +488,7 @@
 
     function renderFallbackQr() {
       const qrTargetUrl = getQrTargetUrl();
+      audienceQrUrl.textContent = qrTargetUrl;
 
       if (typeof window.qrcode !== 'function') {
         audienceHelp.textContent = `Audience URL: ${qrTargetUrl}`;
@@ -510,6 +517,7 @@
 
     function renderOnboardingQr(url) {
       onboardingQrWrap.innerHTML = '';
+      onboardingQrUrl.textContent = url;
 
       if (typeof window.qrcode !== 'function') {
         onboardingQrWrap.textContent = url;
@@ -597,9 +605,11 @@
       modeSummary.textContent = `Provider: ${providerDefinition.label}. Publish destination: ${destination}.`;
 
       const audienceUrl = composeAudienceUrl();
+      const qrTargetUrl = getQrTargetUrl();
       audienceHelp.textContent = audienceUrl
         ? `Audience URL: ${audienceUrl}`
         : `Default static audience URL: ${getDefaultStaticAudienceUrl()}`;
+      audienceQrUrl.textContent = qrTargetUrl;
 
       const mixedContentRisk = window.location.protocol === 'https:' && runtimeConfig.relayBaseUrl.startsWith('http://');
       staticNotes.textContent = mixedContentRisk
