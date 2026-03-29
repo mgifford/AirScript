@@ -1,0 +1,75 @@
+name: Accessibility CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pa11y:
+    name: pa11y WCAG gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install project dependencies
+        run: npm ci
+
+      - name: Install pa11y tooling
+        run: npm install -g pa11y-ci serve wait-on
+
+      - name: Serve static docs site
+        run: |
+          npx serve docs -l 4173 &
+          npx wait-on http://127.0.0.1:4173/
+
+      - name: Run pa11y-ci
+        run: pa11y-ci --config .pa11yci.json
+
+  lighthouse:
+    name: Lighthouse accessibility gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install project dependencies
+        run: npm ci
+
+      - name: Install Lighthouse tooling
+        run: npm install -g @lhci/cli serve wait-on
+
+      - name: Serve static docs site
+        run: |
+          npx serve docs -l 4173 &
+          npx wait-on http://127.0.0.1:4173/
+
+      - name: Run Lighthouse CI accessibility assertions
+        run: lhci autorun --config=.lighthouserc.json
+
+      - name: Upload Lighthouse artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouseci-report
+          path: .lighthouseci

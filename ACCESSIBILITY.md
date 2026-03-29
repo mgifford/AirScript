@@ -98,3 +98,10 @@ Contributor guidance for future personalization work:
 - Preserve browser zoom and user assistive technology behavior rather than replacing them.
 - Add a clear reset path back to device defaults whenever more controls are introduced.
 - Verify all theme combinations continue to meet WCAG 2.2 AA contrast requirements.
+
+### CI/CD Enforcement
+
+- Pull requests and `main` pushes run an accessibility CI gate using pa11y and Lighthouse against key pages.
+- Lighthouse accessibility score is enforced at `>= 0.90` in CI.
+- Scheduled monthly scans run via `github/accessibility-scanner` to catch broader regressions and open actionable issues.
+- Any critical contrast failures identified by CI should be treated as merge-blocking until resolved.

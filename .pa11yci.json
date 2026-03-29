@@ -1,0 +1,16 @@
+{
+  "defaults": {
+    "standard": "WCAG2AA",
+    "runners": ["axe", "htmlcs"],
+    "chromeLaunchConfig": {
+      "args": ["--no-sandbox", "--disable-setuid-sandbox"]
+    },
+    "timeout": 60000
+  },
+  "urls": [
+    "http://127.0.0.1:4173/",
+    "http://127.0.0.1:4173/demo/",
+    "http://127.0.0.1:4173/demo/speaker.html",
+    "http://127.0.0.1:4173/mac-internet-sharing.html"
+  ]
+}

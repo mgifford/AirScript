@@ -84,6 +84,39 @@ Then open:
 
 The local relay accepts cross-origin browser requests so a separately hosted static speaker page can post captions to it, provided browser security rules allow the origin/transport combination.
 
+## Accessibility CI/CD
+
+This repository now has layered accessibility automation in GitHub Actions:
+
+- PR and main-branch gate: `.github/workflows/a11y-ci.yml`
+  - Runs `pa11y-ci` against key URLs in `.pa11yci.json`.
+  - Runs Lighthouse accessibility assertions from `.lighthouserc.json`.
+  - Fails the workflow when accessibility score drops below `0.90`.
+- Scheduled and manual deep scan: `.github/workflows/accessibility-scanner.yml`
+  - Runs monthly on the 1st and can be triggered manually.
+  - Uses `github/accessibility-scanner` to open trackable issues.
+
+The CI gate currently scans:
+
+- `/`
+- `/demo/`
+- `/demo/speaker.html`
+- `/mac-internet-sharing.html`
+
+### Required secret for scheduled scanner
+
+The scheduled scanner needs a fine-grained PAT stored as `GH_TOKEN` because `GITHUB_TOKEN` is not sufficient for issue/PR creation by that action.
+
+Recommended token permissions:
+
+- `actions: write`
+- `contents: write`
+- `issues: write`
+- `pull-requests: write`
+- `metadata: read`
+
+If contrast still feels weak in specific places, run the `Accessibility CI` workflow and inspect which route fails. That gives a concrete target before visual adjustments.
+
 ## GitHub Pages Notes
 
 - The default transcription engine is the MDN [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API)
