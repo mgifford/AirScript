@@ -133,12 +133,14 @@
       <p>If your venue Wi-Fi allows device-to-device communication, the easiest approach:</p>
       <ol>
         <li>Run the local server on your laptop: <code>npm install && npm start</code> (or <code>node server.js</code>).</li>
+        <li>If port <code>8000</code> is already in use, start on a different port: <code>PORT=4000 npm start</code> or <code>PORT=4000 node server.js</code>.</li>
         <li>Find your laptop's local IP address (System Settings > Wi-Fi > Details, or <code>ifconfig | grep inet</code> in Terminal).</li>
-        <li>Share the URL with audience (e.g., <code>http://192.168.1.100:8000/demo/</code>).</li>
+        <li>Share the URL with audience (for example <code>http://192.168.1.100:8000/demo/</code> or <code>http://192.168.1.100:4000/demo/</code> if you changed ports).</li>
         <li>Audience joins your Wi-Fi network and navigates to that URL.</li>
-        <li>Open speaker console on your laptop at <code>http://localhost:8000/demo/speaker.html</code>.</li>
+        <li>Open speaker console on your laptop at <code>http://localhost:8000/demo/speaker.html</code> or the matching custom-port URL such as <code>http://localhost:4000/demo/speaker.html</code>.</li>
         <li>Start captions in Chrome or Edge. Audience captions update in real-time with no internet needed.</li>
       </ol>
+      <p>If you see <code>EADDRINUSE</code>, something is already using port <code>8000</code>. Either stop that process or choose another port with <code>PORT=4000 npm start</code>.</p>
     </section>
 
     <section class="card">
@@ -177,6 +179,7 @@
       <h2>Troubleshooting</h2>
       <ul>
         <li><strong>Server won't start:</strong> Ensure Node.js is installed, then run <code>npm install</code> first.</li>
+        <li><strong>Port 8000 already in use (EADDRINUSE):</strong> Start on a different port with <code>PORT=4000 npm start</code>, then use that same port in both audience and speaker URLs.</li>
         <li><strong>Audience can't reach my URL:</strong> Confirm they're on the same network (Wi-Fi SSID match). Test with ping to your laptop's IP.</li>
         <li><strong>Captions not appearing on audience phones:</strong> Ensure speaker console is open and running browser transcription (check browser console for Web Speech API errors).</li>
         <li><strong>Wi-Fi to Wi-Fi not available in System Settings:</strong> This is normal on single-radio Macs. Use Option 1 (shared network access) or get an Ethernet adapter for Option 2.</li>
