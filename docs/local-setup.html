@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AirScript Local Install And Setup</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: linear-gradient(160deg, #f8fafc 0%, #e0f2fe 45%, #fefce8 100%);
+      --ink: #0f172a;
+      --muted: #334155;
+      --panel: #ffffff;
+      --border: rgba(15, 23, 42, 0.14);
+      --accent: #0b5f59;
+      --accent-text: #ffffff;
+      --button-bg: #ffffff;
+      --button-text: #0f172a;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: radial-gradient(circle at top, #16314b 0%, #06111c 45%, #02050a 100%);
+        --ink: #f8fafc;
+        --muted: #d5e7f6;
+        --panel: #08131f;
+        --border: rgba(191, 212, 229, 0.2);
+        --accent: #d4a800;
+        --accent-text: #111827;
+        --button-bg: #0f1c2e;
+        --button-text: #f8fafc;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      padding: 1.25rem;
+    }
+
+    main {
+      width: min(100%, 64rem);
+      margin: 0 auto;
+      border: 1px solid var(--border);
+      border-radius: 1.25rem;
+      background: var(--panel);
+      padding: 1.25rem;
+      display: grid;
+      gap: 1rem;
+    }
+
+    h1, h2, p { margin: 0; }
+
+    p, li {
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    ol, ul {
+      margin: 0;
+      padding-left: 1.25rem;
+      display: grid;
+      gap: 0.4rem;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+    }
+
+    a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      border-radius: 999px;
+      padding: 0.7rem 1rem;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      color: var(--button-text);
+      background: var(--button-bg);
+      font-weight: 800;
+    }
+
+    a.primary {
+      background: var(--accent);
+      color: var(--accent-text);
+      border-color: transparent;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      background: var(--panel);
+      padding: 0.9rem 1rem;
+      display: grid;
+      gap: 0.6rem;
+    }
+
+    code {
+      font-family: "SF Mono", "Menlo", monospace;
+      overflow-wrap: anywhere;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>AirScript Local Install And Setup</h1>
+    <p>Use this page as the single source of truth for live-room setup. GitHub Pages is a static preview; real audience syncing requires local installation on the presenter laptop.</p>
+
+    <div class="actions">
+      <a class="primary" href="./demo/speaker.html">Open Speaker Console</a>
+      <a href="./demo/">Open Audience Demo</a>
+      <a href="./mac-internet-sharing.html">Mac Internet Sharing Details</a>
+      <a href="./">Back To Landing Page</a>
+    </div>
+
+    <section class="card">
+      <h2>Step 1: Install And Start Locally</h2>
+      <ol>
+        <li>Install Node.js 18+ on the presenter laptop.</li>
+        <li>From the project folder, run <code>npm install</code>.</li>
+        <li>Start the relay with <code>npm start</code>.</li>
+        <li>If port <code>8000</code> is busy, run <code>PORT=4000 npm start</code>.</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h2>Step 2: Open Speaker And Audience URLs</h2>
+      <ol>
+        <li>Use the speaker URL opened by startup, or open <code>https://localhost:8000/demo/speaker.html</code>.</li>
+        <li>Find your laptop LAN IP and share <code>https://YOUR_LAN_IP:8000/demo/</code> with attendees.</li>
+        <li>All audience devices must join the same network as the presenter laptop.</li>
+      </ol>
+      <p>The first connection may show a certificate warning because local HTTPS uses a self-signed certificate by default.</p>
+    </section>
+
+    <section class="card">
+      <h2>Step 3: Run The Session</h2>
+      <ol>
+        <li>Open speaker page in Chrome or Edge.</li>
+        <li>Start captions and allow microphone access.</li>
+        <li>Verify audience devices are receiving updates.</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h2>Need Network Help?</h2>
+      <p>If venue Wi-Fi blocks device-to-device traffic, use the Mac Internet Sharing guide.</p>
+      <p><a href="./mac-internet-sharing.html">Open Mac Internet Sharing Guide</a></p>
+    </section>
+  </main>
+</body>
+</html>

@@ -452,7 +452,7 @@
       <div class="stack">
         <p class="eyebrow">Start Here</p>
         <h1 class="hero-title">AirScript Demo</h1>
-        <p class="hero-copy">Open the speaker console on the presenter device, then share this demo URL or QR code with audience phones. This page also checks what this browser can support so people can tell quickly whether they are on a speaker-ready device or just an audience viewer.</p>
+        <p class="hero-copy" id="hero-copy">Open the speaker console on the presenter device, then share this demo URL or QR code with audience phones. This page also checks what this browser can support so people can tell quickly whether they are on a speaker-ready device or just an audience viewer.</p>
         <div class="start-grid">
           <div class="stack">
             <div class="start-actions">
@@ -471,14 +471,14 @@
             </div>
             <div class="status-card">
               <p><strong>Quick start</strong></p>
-              <ol class="setup-list">
+              <ol class="setup-list" id="quick-start-list">
                 <li>Open the speaker console on the device with the microphone.</li>
                 <li>Use Chrome or Edge there for browser-native speech capture.</li>
                 <li>Share this demo URL or let audience phones scan the QR code.</li>
                 <li>Captions appear here in real-time (no internet connection required).</li>
                 <li>(Optional) Advanced: add a relay URL for SSE updates or third-party transcription.</li>
               </ol>
-              <p><a class="action-link secondary" href="../mac-internet-sharing.html">Network setup help (Wi-Fi, Internet Sharing, or local relay)</a></p>
+              <p><a class="action-link secondary" id="network-help-link" href="../local-setup.html">Local install and network setup</a></p>
             </div>
           </div>
           <div class="qr-card">
@@ -558,8 +558,11 @@
     const settingsAnnouncer = document.getElementById('settings-announcer');
     const openSpeakerLink = document.getElementById('open-speaker-link');
     const openDemoLink = document.getElementById('open-demo-link');
+    const heroCopy = document.getElementById('hero-copy');
     const demoUrlText = document.getElementById('demo-url-text');
     const demoIndexUrlText = document.getElementById('demo-index-url-text');
+    const quickStartList = document.getElementById('quick-start-list');
+    const networkHelpLink = document.getElementById('network-help-link');
     const setupStatusList = document.getElementById('setup-status-list');
     const startQr = document.getElementById('start-qr');
     const qrHelp = document.getElementById('qr-help');
@@ -737,6 +740,29 @@
         && !config.streamUrl
         && !config.relayBaseUrl;
       const shareableAudienceUrl = isStaticPagesMode ? '' : demoUrl;
+
+      if (isStaticPagesMode) {
+        heroCopy.textContent = 'You are viewing a static preview. For a live room session, install and run AirScript locally on the presenter laptop, then open this page from the LAN URL.';
+        quickStartList.innerHTML = [
+          'Install locally first: run <code>npm install && npm start</code> on the presenter laptop.',
+          'Open the speaker console from that LAN host in Chrome or Edge.',
+          'Share the LAN audience URL (for example <code>https://192.168.x.x:8000/demo/</code>) or scan the LAN QR code.',
+          'Audience devices must be on the same network as the presenter laptop.',
+          'Use this GitHub Pages URL only as a static preview of the interface.'
+        ].map((item) => `<li>${item}</li>`).join('');
+      } else {
+        heroCopy.textContent = 'Open the speaker console on the presenter device, then share this demo URL or QR code with audience phones. This page also checks what this browser can support so people can tell quickly whether they are on a speaker-ready device or just an audience viewer.';
+        quickStartList.innerHTML = [
+          'Open the speaker console on the device with the microphone.',
+          'Use Chrome or Edge there for browser-native speech capture.',
+          'Share this audience URL or let audience phones scan the QR code.',
+          'Captions appear here in real-time on the same network (no internet required).',
+          '(Optional) Advanced: add a relay URL for SSE updates or third-party transcription.'
+        ].map((item) => `<li>${item}</li>`).join('');
+      }
+
+      networkHelpLink.href = '../local-setup.html';
+      networkHelpLink.textContent = 'Local install and network setup';
 
       demoUrlText.textContent = shareableAudienceUrl || 'Live audience URL unavailable in static preview mode.';
       demoIndexUrlText.textContent = demoIndexUrl;
