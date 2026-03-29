@@ -292,6 +292,18 @@
         grid-template-columns: 1fr;
       }
     }
+
+    .site-footer {
+      margin-top: 1.5rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+
+    .site-footer a {
+      color: var(--accent);
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -847,5 +859,8 @@
     refreshConfigUi();
     rebuildProviderSession();
   </script>
+  <footer class="site-footer">
+    <p>AirScript is open source. Found a bug or have a suggestion? <a href="https://github.com/mgifford/AirScript/" target="_blank" rel="noopener noreferrer">Open an issue on GitHub ↗</a>.</p>
+  </footer>
 </body>
 </html>

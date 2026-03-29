@@ -76,7 +76,7 @@
       gap: 0.4rem;
     }
 
-    .actions {
+    .site-nav {
       display: flex;
       flex-wrap: wrap;
       gap: 0.7rem;
@@ -115,6 +115,25 @@
       font-family: "SF Mono", "Menlo", monospace;
       overflow-wrap: anywhere;
     }
+
+    .site-footer {
+      margin-top: 1rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+
+    .site-footer a {
+      display: inline;
+      min-height: unset;
+      border-radius: 0;
+      padding: 0;
+      border: none;
+      background: none;
+      color: var(--accent);
+      text-decoration: underline;
+      font-weight: normal;
+    }
   </style>
 </head>
 <body>
@@ -123,12 +142,13 @@
     <p><strong>AirScript requires no internet connection.</strong> It runs entirely locally with on-device transcription and no external API calls. Choose a setup method below based on your venue and available hardware.</p>
     <p><strong>Start here first:</strong> use the consolidated local install guide at <a href="./local-setup.html">Local Install And Setup</a>, then return to this page if you need Internet Sharing-specific steps.</p>
 
-    <div class="actions">
+    <nav class="site-nav" aria-label="Site navigation">
       <a class="primary" href="./demo/speaker.html">Open Speaker Console</a>
-      <a href="./demo/">Open Audience Demo</a>
+      <a href="./demo/">Open Demo</a>
       <a href="./local-setup.html">Local Install And Setup</a>
-      <a href="./">Back To Landing Page</a>
-    </div>
+      <a href="./">Home</a>
+      <a href="https://github.com/mgifford/AirScript/" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    </nav>
 
     <section class="card">
       <h2>Option 1: Use Your Regular Wi-Fi Network (Simplest)</h2>
@@ -191,5 +211,8 @@
       </ul>
     </section>
   </main>
+  <footer class="site-footer">
+    <p>AirScript is open source. Found a bug or have a suggestion? <a href="https://github.com/mgifford/AirScript/" target="_blank" rel="noopener noreferrer">Open an issue on GitHub ↗</a>.</p>
+  </footer>
 </body>
 </html>
