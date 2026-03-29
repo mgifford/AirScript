@@ -13,15 +13,19 @@
     :root {
       color-scheme: light dark;
       --bg: linear-gradient(180deg, #fff8ef 0%, #f9fafb 55%, #eef2ff 100%);
-      --panel: rgba(255, 255, 255, 0.88);
+      --panel: #ffffff;
       --text: #0f172a;
-      --muted: #334155;
-      --accent: #0f766e;
+      --muted: #1f2937;
+      --accent: #0b5f59;
+      --accent-text: #ffffff;
       --border: rgba(15, 23, 42, 0.12);
+      --card-bg: #f8fafc;
+      --status-ok: #166534;
+      --status-warn: #92400e;
       --caption-size: clamp(2rem, 7vw, 5.5rem);
       --caption-line-height: 1.08;
       --body-scale: 1;
-      --control-bg: rgba(15, 23, 42, 0.04);
+      --control-bg: #f1f5f9;
       --control-text: var(--text);
       --control-border: var(--border);
     }
@@ -29,12 +33,16 @@
     @media (prefers-color-scheme: dark) {
       :root {
         --bg: radial-gradient(circle at top, #16314b 0%, #06111c 45%, #02050a 100%);
-        --panel: rgba(6, 17, 28, 0.8);
+        --panel: #0b1220;
         --text: #f8fafc;
-        --muted: #bfd4e5;
+        --muted: #dbeafe;
         --accent: #fde047;
+        --accent-text: #111827;
         --border: rgba(191, 212, 229, 0.2);
-        --control-bg: rgba(255, 255, 255, 0.08);
+        --card-bg: #0f1b2d;
+        --status-ok: #86efac;
+        --status-warn: #fcd34d;
+        --control-bg: #162133;
         --control-text: #f8fafc;
         --control-border: rgba(191, 212, 229, 0.2);
       }
@@ -43,12 +51,16 @@
     body[data-theme="light"] {
       color-scheme: light;
       --bg: linear-gradient(180deg, #fff8ef 0%, #f9fafb 55%, #eef2ff 100%);
-      --panel: rgba(255, 255, 255, 0.88);
+      --panel: #ffffff;
       --text: #0f172a;
-      --muted: #334155;
-      --accent: #0f766e;
+      --muted: #1f2937;
+      --accent: #0b5f59;
+      --accent-text: #ffffff;
       --border: rgba(15, 23, 42, 0.12);
-      --control-bg: rgba(15, 23, 42, 0.04);
+      --card-bg: #f8fafc;
+      --status-ok: #166534;
+      --status-warn: #92400e;
+      --control-bg: #f1f5f9;
       --control-text: #0f172a;
       --control-border: rgba(15, 23, 42, 0.12);
     }
@@ -56,12 +68,16 @@
     body[data-theme="dark"] {
       color-scheme: dark;
       --bg: radial-gradient(circle at top, #16314b 0%, #06111c 45%, #02050a 100%);
-      --panel: rgba(6, 17, 28, 0.8);
+      --panel: #0b1220;
       --text: #f8fafc;
-      --muted: #bfd4e5;
+      --muted: #dbeafe;
       --accent: #fde047;
+      --accent-text: #111827;
       --border: rgba(191, 212, 229, 0.2);
-      --control-bg: rgba(255, 255, 255, 0.08);
+      --card-bg: #0f1b2d;
+      --status-ok: #86efac;
+      --status-warn: #fcd34d;
+      --control-bg: #162133;
       --control-text: #f8fafc;
       --control-border: rgba(191, 212, 229, 0.2);
     }
@@ -73,7 +89,11 @@
       --text: #fff200;
       --muted: #fff8a6;
       --accent: #fff200;
+      --accent-text: #111111;
       --border: rgba(255, 242, 0, 0.55);
+      --card-bg: #0b0b0b;
+      --status-ok: #fff200;
+      --status-warn: #fff200;
       --control-bg: #111111;
       --control-text: #fff200;
       --control-border: rgba(255, 242, 0, 0.55);
@@ -173,7 +193,7 @@
       border-radius: 999px;
       border: 1px solid var(--control-border);
       background: var(--accent);
-      color: #081018;
+      color: var(--accent-text);
       text-decoration: none;
       font-weight: 800;
     }
@@ -197,7 +217,7 @@
       border: 1px solid var(--border);
       border-radius: 1rem;
       padding: 1rem;
-      background: rgba(255, 255, 255, 0.32);
+      background: var(--card-bg);
     }
 
     .url-card p,
@@ -212,11 +232,11 @@
     }
 
     .status-ok {
-      color: var(--accent);
+      color: var(--status-ok);
     }
 
     .status-warn {
-      color: #b45309;
+      color: var(--status-warn);
     }
 
     body[data-theme="contrast"] .status-warn {
@@ -241,6 +261,7 @@
 
     .mono-link {
       overflow-wrap: anywhere;
+      color: var(--text);
     }
 
     .settings-grid {
@@ -291,7 +312,7 @@
 
     .setting-button[aria-pressed="true"] {
       background: var(--accent);
-      color: #081018;
+      color: var(--accent-text);
       border-color: transparent;
     }
 
@@ -365,6 +386,7 @@
     code {
       font-family: "SF Mono", "Menlo", monospace;
       font-size: 0.92rem;
+      color: var(--text);
     }
 
     .fade-in {

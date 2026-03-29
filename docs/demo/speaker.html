@@ -13,10 +13,13 @@
       color-scheme: light;
       --bg: linear-gradient(160deg, #f8fafc 0%, #e0f2fe 45%, #fefce8 100%);
       --ink: #0f172a;
-      --muted: #475569;
-      --accent: #0f766e;
-      --accent-strong: #115e59;
-      --panel: rgba(255, 255, 255, 0.8);
+      --muted: #1f2937;
+      --accent: #0b5f59;
+      --accent-text: #ffffff;
+      --accent-strong: #166534;
+      --panel: #ffffff;
+      --card-bg: #f8fafc;
+      --input-bg: #ffffff;
       --border: rgba(15, 23, 42, 0.12);
       --error: #b91c1c;
     }
@@ -92,18 +95,18 @@
       font-weight: 800;
       border: 1px solid var(--border);
       background: var(--accent);
-      color: white;
+      color: var(--accent-text);
     }
 
     .action-link.secondary {
-      background: white;
+      background: #f1f5f9;
       color: var(--ink);
     }
 
     .card {
       border: 1px solid var(--border);
       border-radius: 1rem;
-      background: rgba(255, 255, 255, 0.55);
+      background: var(--card-bg);
       padding: 0.9rem 1rem;
       margin-bottom: 0.8rem;
     }
@@ -176,11 +179,11 @@
       font-weight: 700;
       cursor: pointer;
       background: var(--accent);
-      color: white;
+      color: var(--accent-text);
     }
 
     button.secondary {
-      background: white;
+      background: #f1f5f9;
       color: var(--ink);
       border: 1px solid var(--border);
     }
@@ -203,7 +206,7 @@
       min-height: 16rem;
       border-radius: 1rem;
       border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.85);
+      background: var(--card-bg);
       padding: 1rem;
       font-size: 1.15rem;
       line-height: 1.5;
@@ -229,7 +232,7 @@
       border: 1px solid var(--border);
       padding: 0.8rem 0.9rem;
       font: inherit;
-      background: rgba(255, 255, 255, 0.92);
+      background: var(--input-bg);
       color: var(--ink);
     }
 
@@ -253,8 +256,8 @@
       border: 1px dashed var(--border);
       border-radius: 1rem;
       padding: 0.85rem 1rem;
-      background: rgba(255, 255, 255, 0.55);
-      color: var(--muted);
+      background: var(--card-bg);
+      color: var(--ink);
       line-height: 1.5;
     }
 

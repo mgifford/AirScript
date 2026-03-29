@@ -9,20 +9,26 @@
       color-scheme: light dark;
       --bg: linear-gradient(160deg, #f8fafc 0%, #e0f2fe 45%, #fefce8 100%);
       --ink: #0f172a;
-      --muted: #475569;
-      --panel: rgba(255, 255, 255, 0.88);
+      --muted: #334155;
+      --panel: #ffffff;
       --border: rgba(15, 23, 42, 0.12);
-      --accent: #0f766e;
+      --accent: #0b5f59;
+      --accent-text: #ffffff;
+      --button-bg: #ffffff;
+      --button-text: #0f172a;
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
         --bg: radial-gradient(circle at top, #16314b 0%, #06111c 45%, #02050a 100%);
         --ink: #f8fafc;
-        --muted: #bfd4e5;
-        --panel: rgba(6, 17, 28, 0.82);
+        --muted: #d5e7f6;
+        --panel: #08131f;
         --border: rgba(191, 212, 229, 0.2);
-        --accent: #fde047;
+        --accent: #d4a800;
+        --accent-text: #111827;
+        --button-bg: #0f1c2e;
+        --button-text: #f8fafc;
       }
     }
 
@@ -78,13 +84,13 @@
       text-decoration: none;
       font-weight: 800;
       border: 1px solid var(--border);
-      color: var(--ink);
-      background: white;
+      color: var(--button-text);
+      background: var(--button-bg);
     }
 
     a.primary {
       background: var(--accent);
-      color: #081018;
+      color: var(--accent-text);
       border-color: transparent;
     }
 
