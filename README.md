@@ -80,7 +80,9 @@ Then open:
 - **Audience QR does not open the right page:** Verify it resolves to `/demo/` or `/demo/index.html`. Refresh the speaker page after changing publish mode or relay URL.
 - **Relay updates fail from GitHub Pages:** If the page is HTTPS and the relay is `http://`, browsers usually block requests as mixed content. Use local server mode or an HTTPS relay.
 - **No live audience text yet:** Static mode works without relay. Configure relay mode only when you need cross-device SSE updates.
-- **Need Mac Internet Sharing help:** Open `https://mgifford.github.io/AirScript/mac-internet-sharing.html` for step-by-step setup from System Settings.
+- **I don't have internet at my event:** That's fine! AirScript requires **zero internet**. Run `npm start` and serve locally from your laptop. All transcription, caption updates, and QR codes work entirely on the local network.
+- **Venue Wi-Fi blocks device-to-device traffic:** Use Internet Sharing to create your own network, or run local relay mode (`npm start`) and share your laptop's IP.
+- **Need network setup help:** Open `https://mgifford.github.io/AirScript/mac-internet-sharing.html` for two options: using your regular Wi-Fi and local relay, or setting up Mac Internet Sharing.
 
 The local relay accepts cross-origin browser requests so a separately hosted static speaker page can post captions to it, provided browser security rules allow the origin/transport combination.
 
@@ -166,18 +168,33 @@ If an API key is entered in the speaker UI, it is sent as `Authorization: Bearer
 
 ## Network Setup
 
-### macOS Internet Sharing (recommended for events)
+**AirScript requires no internet connection.** All transcription and caption updates happen on-device or over your local network.
 
-1. Open **System Settings**.
-2. Go to **General** -> **Sharing**.
-3. Open **Internet Sharing** settings.
-4. Set **Share your connection from** to your active uplink (Wi-Fi or Ethernet).
-5. Set **To computers using** to **Wi-Fi**.
-6. Configure Wi-Fi options (SSID and password).
-7. Turn **Internet Sharing** on.
-8. On audience phones, join that shared Wi-Fi and scan the QR code from `/demo/speaker.html`.
+### Simplest Setup: Local Relay Mode
 
-If these steps are hard to follow in the room, use the dedicated guide page:
+If your venue has regular Wi-Fi (or any network where devices can see each other):
+
+1. Run `npm install && npm start` on your laptop.
+2. Find your laptop's IP: **System Settings** → **Wi-Fi** → **Details**, or run `ifconfig | grep inet` in Terminal.
+3. Share the URL with audience, e.g., `http://192.168.1.100:8000/demo/`.
+4. Audience joins your Wi-Fi and navigates to that URL.
+5. Open speaker console on your laptop at `http://localhost:8000/demo/speaker.html`.
+6. Start speaking. Captions sync in real-time to all devices—no internet needed.
+
+### If Venue Wi-Fi Blocks Local Traffic: macOS Internet Sharing
+
+Only use this if your network admin has blocked device-to-device communication:
+
+1. Open **System Settings** → **General** → **Sharing**.
+2. Select **Internet Sharing**.
+3. Set **Share your connection from** to your active uplink (Wi-Fi, Ethernet, or cellular hotspot—you don't need internet visible to devices).
+4. Set **To computers using** to **Wi-Fi**.
+5. Turn **Internet Sharing** on and configure the network name/password.
+6. Follow the same local relay steps as above (devices join your shared network instead).
+
+Note: If you only have one Wi-Fi radio, macOS cannot share Wi-Fi to Wi-Fi. In that case, use the regular network (option 1) or get an Ethernet adapter for option 2.
+
+For step-by-step help with both setups:
 
 - `https://mgifford.github.io/AirScript/mac-internet-sharing.html`
 

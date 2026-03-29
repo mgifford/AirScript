@@ -113,8 +113,8 @@
 </head>
 <body>
   <main>
-    <h1>Mac Internet Sharing For AirScript</h1>
-    <p>Use this when venue Wi-Fi blocks local device-to-device traffic. Your Mac will create a local Wi-Fi network so audience phones can open the AirScript demo directly.</p>
+    <h1>Network Setup For AirScript (Offline-First)</h1>
+    <p><strong>AirScript requires no internet connection.</strong> It runs entirely locally with on-device transcription and no external API calls. Choose a setup method below based on your venue and available hardware.</p>
 
     <div class="actions">
       <a class="primary" href="./demo/speaker.html">Open Speaker Console</a>
@@ -123,35 +123,58 @@
     </div>
 
     <section class="card">
-      <h2>Step By Step (macOS Ventura/Sonoma+)</h2>
+      <h2>Option 1: Use Your Regular Wi-Fi Network (Simplest)</h2>
+      <p>If your venue Wi-Fi allows device-to-device communication, the easiest approach:</p>
       <ol>
-        <li>Open <strong>System Settings</strong>.</li>
-        <li>Go to <strong>General</strong> -> <strong>Sharing</strong>.</li>
-        <li>Open <strong>Internet Sharing</strong> options.</li>
-        <li>Set <strong>Share your connection from</strong> to your upstream network (usually Wi-Fi or Ethernet).</li>
-        <li>Set <strong>To computers using</strong> to <strong>Wi-Fi</strong>.</li>
-        <li>Configure a network name and password under Wi-Fi options.</li>
-        <li>Toggle <strong>Internet Sharing</strong> on and confirm.</li>
+        <li>Run the local server on your laptop: <code>npm install && npm start</code> (or <code>node server.js</code>).</li>
+        <li>Find your laptop's local IP address (System Settings > Wi-Fi > Details, or <code>ifconfig | grep inet</code> in Terminal).</li>
+        <li>Share the URL with audience (e.g., <code>http://192.168.1.100:8000/demo/</code>).</li>
+        <li>Audience joins your Wi-Fi network and navigates to that URL.</li>
+        <li>Open speaker console on your laptop at <code>http://localhost:8000/demo/speaker.html</code>.</li>
+        <li>Start captions in Chrome or Edge. Audience captions update in real-time with no internet needed.</li>
       </ol>
     </section>
 
     <section class="card">
-      <h2>Then Start AirScript</h2>
+      <h2>Option 2: Mac Internet Sharing (If Venue Wi-Fi Blocks Local Traffic)</h2>
+      <p>Use this only if venue Wi-Fi blocks device-to-device communication. Your Mac creates its own network for the event.</p>
+      
+      <h3>Prerequisites</h3>
+      <p>You need an active upstream connection: Wi-Fi, Ethernet, or cellular hotspot. (You don't need it to be exposed to the internet—just active.)</p>
+      
+      <h3>Setup Steps (macOS Ventura/Sonoma+)</h3>
       <ol>
-        <li>Open <code>https://mgifford.github.io/AirScript/demo/speaker.html</code> on the presenter laptop.</li>
-        <li>Join audience phones to the shared network.</li>
-        <li>Have attendees scan the QR code shown on the speaker page.</li>
-        <li>Start captions in Chrome or Edge on the speaker device.</li>
+        <li>Open <strong>System Settings</strong> > <strong>General</strong> > <strong>Sharing</strong>.</li>
+        <li>Click the lock icon to unlock settings (if needed).</li>
+        <li>Select <strong>Internet Sharing</strong> from the left sidebar.</li>
+        <li>Set <strong>Share your connection from</strong> to your upstream source (Wi-Fi, Ethernet, or USB adapter).</li>
+        <li>Set <strong>To computers using</strong> to <strong>Wi-Fi</strong> (or Ethernet if available).</li>
+        <li>Click the Wi-Fi Options button and configure network name and password.</li>
+        <li>Toggle <strong>Internet Sharing</strong> <strong>ON</strong> and confirm.</li>
+      </ol>
+      
+      <h3>Why Wi-Fi to Wi-Fi Might Not Appear</h3>
+      <p>If you only have one Wi-Fi radio, macOS cannot share a Wi-Fi connection to Wi-Fi (that would require two separate radios). You must share FROM an Ethernet port or USB adapter TO Wi-Fi. If you don't have Ethernet available, use Option 1 instead (your regular network).</p>
+      
+      <h3>Then Start AirScript</h3>
+      <ol>
+        <li>Run the local server: <code>npm start</code> or <code>node server.js</code>.</li>
+        <li>Find your laptop's IP on the shared network (System Settings > Wi-Fi > Details).</li>
+        <li>Share the URL with audience (e.g., <code>http://192.168.1.100:8000/demo/</code>).</li>
+        <li>Audience joins the shared network and navigates to that URL.</li>
+        <li>Open speaker console at <code>http://localhost:8000/demo/speaker.html</code> on your laptop.</li>
+        <li>Start captions. Real-time updates sync to all audience devices.</li>
       </ol>
     </section>
 
     <section class="card">
-      <h2>If It Still Fails</h2>
+      <h2>Troubleshooting</h2>
       <ul>
-        <li>Reconnect the phone to the shared SSID and disable VPN on both devices.</li>
-        <li>Confirm the speaker page shows a valid Audience URL and QR code.</li>
-        <li>If you are using relay mode from GitHub Pages, avoid <code>http://</code> relay targets from an <code>https://</code> page.</li>
-        <li>When in doubt, keep the default static mode first, then add relay once baseline works.</li>
+        <li><strong>Server won't start:</strong> Ensure Node.js is installed, then run <code>npm install</code> first.</li>
+        <li><strong>Audience can't reach my URL:</strong> Confirm they're on the same network (Wi-Fi SSID match). Test with ping to your laptop's IP.</li>
+        <li><strong>Captions not appearing on audience phones:</strong> Ensure speaker console is open and running browser transcription (check browser console for Web Speech API errors).</li>
+        <li><strong>Wi-Fi to Wi-Fi not available in System Settings:</strong> This is normal on single-radio Macs. Use Option 1 (shared network access) or get an Ethernet adapter for Option 2.</li>
+        <li><strong>Internet Sharing won't enable:</strong> Ensure you have an active upstream connection (even if not exposed to the internet).</li>
       </ul>
     </section>
   </main>
