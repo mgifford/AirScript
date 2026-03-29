@@ -466,7 +466,7 @@
               <p class="mono-link" id="demo-index-url-text"></p>
             </div>
             <div class="status-card">
-              <p><strong>Browser checks</strong></p>
+               <p><strong>Audience setup checks</strong></p>
               <ul class="status-list" id="setup-status-list"></ul>
             </div>
             <div class="status-card">
@@ -654,18 +654,10 @@
     }
 
     function getDemoUrl() {
-      if (window.LocalSyncConfig.isGithubPagesHost(window.location.hostname)) {
-        return siteConfig.localDemoPlaceholderUrl || siteConfig.demoUrl || new URL('./', window.location.href).toString();
-      }
-
       return siteConfig.demoUrl || new URL('./', window.location.href).toString();
     }
 
     function getDemoIndexUrl() {
-      if (window.LocalSyncConfig.isGithubPagesHost(window.location.hostname)) {
-        return getDemoUrl();
-      }
-
       return siteConfig.demoIndexUrl || new URL('index.html', getDemoUrl()).toString();
     }
 
@@ -674,6 +666,14 @@
     }
 
     function renderSetupQr(url) {
+      if (!url) {
+        startQr.innerHTML = '';
+        startQr.textContent = 'QR disabled in static preview mode.';
+        startQrUrl.textContent = 'Unavailable in static preview mode.';
+        qrHelp.textContent = 'Run the local relay on your laptop, then use the LAN audience URL for QR sharing.';
+        return;
+      }
+
       startQrUrl.textContent = url;
 
       if (typeof window.qrcode !== 'function') {
@@ -693,26 +693,30 @@
     }
 
     function renderSetupChecks() {
+       const isStaticPagesMode = window.LocalSyncConfig.isGithubPagesHost(window.location.hostname)
+         && !config.streamUrl
+         && !config.relayBaseUrl;
+ 
       const checks = [
         {
-          ok: window.isSecureContext,
-          okLabel: 'Secure context is available on this page.',
-          warnLabel: 'This page is not in a secure context. Browser microphone capture usually requires HTTPS or localhost.'
+           ok: !isStaticPagesMode,
+           okLabel: 'Live relay mode is configured for this audience page.',
+           warnLabel: 'Static preview mode only: this GitHub Pages URL is not a live room relay by itself.'
         },
         {
-          ok: speechRecognitionSupported,
-          okLabel: 'This browser can act as a speaker device with the Web Speech API.',
-          warnLabel: 'This browser does not expose the Web Speech API. Use Chrome or Edge on the speaker device.'
+           ok: Boolean(config.streamUrl),
+           okLabel: 'Audience stream endpoint is configured and ready for live updates.',
+           warnLabel: 'No audience stream endpoint is configured yet. Start the local relay and open this page from the LAN URL.'
         },
         {
-          ok: Boolean(config.streamUrl),
-          okLabel: 'A live relay stream is configured for this audience page.',
-          warnLabel: 'No relay stream is configured yet. This demo still works as a static audience page.'
+           ok: window.isSecureContext,
+           okLabel: 'Secure context is available for modern browser features.',
+           warnLabel: 'This page is not in a secure context. Use HTTPS or localhost for reliable browser behavior.'
         },
         {
           ok: navigator.onLine,
-          okLabel: 'This device reports that it is online.',
-          warnLabel: 'This device reports that it is offline. Local relay mode can still work if the page is already loaded.'
+           okLabel: 'This device reports network connectivity.',
+           warnLabel: 'This device reports offline status. Reconnect to the same LAN as the relay host.'
         }
       ];
 
@@ -729,13 +733,17 @@
       const demoUrl = getDemoUrl();
       const demoIndexUrl = getDemoIndexUrl();
       const speakerUrl = getSpeakerUrl();
+      const isStaticPagesMode = window.LocalSyncConfig.isGithubPagesHost(window.location.hostname)
+        && !config.streamUrl
+        && !config.relayBaseUrl;
+      const shareableAudienceUrl = isStaticPagesMode ? '' : demoUrl;
 
-      demoUrlText.textContent = demoUrl;
+      demoUrlText.textContent = shareableAudienceUrl || 'Live audience URL unavailable in static preview mode.';
       demoIndexUrlText.textContent = demoIndexUrl;
       openDemoLink.href = demoIndexUrl;
       openDemoLink.textContent = demoIndexUrl;
       openSpeakerLink.href = speakerUrl;
-      renderSetupQr(demoUrl);
+      renderSetupQr(shareableAudienceUrl);
       renderSetupChecks();
     }
 
@@ -759,7 +767,7 @@
       slideStream.removeAttribute('sse-swap');
       const defaultUrl = siteConfig.demoUrl || window.location.href;
       if (window.LocalSyncConfig.isGithubPagesHost(window.location.hostname)) {
-        connectionNote.innerHTML = `Static preview mode on GitHub Pages. Live audience sync cannot be demonstrated from this URL alone. Run the local server on your laptop and open this page from your LAN URL (example <code>http://192.168.x.x:8000/demo/</code>), then use the matching speaker URL on that same host.`;
+        connectionNote.innerHTML = `Static preview mode on GitHub Pages. Live audience sync cannot be demonstrated from this URL alone. Run the local server on your laptop and open this page from your LAN URL (example <code>https://192.168.x.x:8000/demo/</code>), then use the matching speaker URL on that same host.`;
       } else {
         connectionNote.innerHTML = `No stream is configured. Default static URL: <code>${defaultUrl}</code>. Add <code>?relay=https://your-relay-host</code> or <code>?stream=https://your-relay-host/stream</code> when you want live audience updates.`;
       }
