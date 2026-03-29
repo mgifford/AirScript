@@ -48,6 +48,7 @@
     return {
       relayBaseUrl: params.get('relay') || '',
       streamUrl: params.get('stream') || '',
+      audienceUrlOverride: params.get('audience') || '',
       publishMode: params.get('publish') || '',
       provider: params.get('provider') || '',
       providerEndpoint: params.get('providerEndpoint') || '',
@@ -68,6 +69,7 @@
       providerEndpoint: query.providerEndpoint || stored.providerEndpoint || '',
       providerPrompt: query.providerPrompt || stored.providerPrompt || '',
       providerResponseField: query.providerResponseField || stored.providerResponseField || 'text',
+      audienceUrlOverride: query.audienceUrlOverride || stored.audienceUrlOverride || '',
       relayBaseUrl,
       streamUrl,
       updateUrl: buildEndpoint(relayBaseUrl, '/update'),
@@ -83,6 +85,7 @@
       providerEndpoint: config.providerEndpoint || '',
       providerPrompt: config.providerPrompt || '',
       providerResponseField: config.providerResponseField || 'text',
+      audienceUrlOverride: config.audienceUrlOverride || '',
       relayBaseUrl: config.relayBaseUrl || '',
       streamUrl: config.streamUrl || buildEndpoint(config.relayBaseUrl || '', '/stream'),
       publishMode: config.publishMode || 'local-only'

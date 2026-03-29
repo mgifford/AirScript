@@ -378,6 +378,10 @@
           <input id="relay-base-url" type="url" placeholder="https://relay.example.com or http://192.168.2.1:8000">
         </label>
         <label>
+          Audience URL Override (recommended for LAN)
+          <input id="audience-url-override" type="url" placeholder="http://192.168.50.243:8000/demo/">
+        </label>
+        <label>
           Optional API Key
           <input id="api-key" type="password" placeholder="Stored only for this browser session">
         </label>
@@ -422,6 +426,7 @@
     const providerPromptInput = document.getElementById('provider-prompt');
     const publishModeSelect = document.getElementById('publish-mode-select');
     const relayBaseUrlInput = document.getElementById('relay-base-url');
+    const audienceUrlOverrideInput = document.getElementById('audience-url-override');
     const apiKeyInput = document.getElementById('api-key');
     const modeSummary = document.getElementById('mode-summary');
     const staticNotes = document.getElementById('static-notes');
@@ -460,6 +465,15 @@
     }
 
     function composeAudienceUrl() {
+      const override = (runtimeConfig.audienceUrlOverride || '').trim().replace(/\/$/, '');
+      if (override) {
+        return `${override}/`;
+      }
+
+      if (window.LocalSyncConfig.isLocalLikeHost(window.location.hostname) && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        return new URL('./', window.location.href).toString();
+      }
+
       if (runtimeConfig.publishMode === 'relay' && runtimeConfig.relayBaseUrl && window.LocalSyncConfig.isLocalLikeHost(window.location.hostname)) {
         return runtimeConfig.relayBaseUrl;
       }
@@ -599,6 +613,7 @@
       providerPromptInput.value = runtimeConfig.providerPrompt || '';
       publishModeSelect.value = runtimeConfig.publishMode;
       relayBaseUrlInput.value = runtimeConfig.relayBaseUrl;
+      audienceUrlOverrideInput.value = runtimeConfig.audienceUrlOverride || '';
       apiKeyInput.value = runtimeConfig.apiKey;
 
       const destination = runtimeConfig.publishMode === 'relay' && runtimeConfig.updateUrl
@@ -613,6 +628,12 @@
         ? `Audience URL: ${audienceUrl}`
         : `Default static audience URL: ${getDefaultStaticAudienceUrl()}`;
       audienceQrUrl.textContent = qrTargetUrl;
+
+      if (!runtimeConfig.audienceUrlOverride && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+        onboardingQrNote.textContent = 'This page is opened on localhost, so QR may not work for other devices. Open speaker with your LAN IP or set Audience URL Override.';
+      } else {
+        onboardingQrNote.textContent = 'Scan this from another device to open the audience page.';
+      }
 
       const mixedContentRisk = window.location.protocol === 'https:' && runtimeConfig.relayBaseUrl.startsWith('http://');
       staticNotes.textContent = mixedContentRisk
@@ -741,6 +762,7 @@
         providerPrompt: providerPromptInput.value.trim(),
         publishMode: publishModeSelect.value,
         relayBaseUrl: relayBaseUrlInput.value.trim().replace(/\/$/, ''),
+        audienceUrlOverride: audienceUrlOverrideInput.value.trim(),
         streamUrl: '',
         apiKey: apiKeyInput.value.trim()
       });
