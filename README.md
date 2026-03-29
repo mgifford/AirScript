@@ -39,6 +39,14 @@ The longer architecture and deployment notes live in [HOW_IT_WORKS.md](./HOW_IT_
 - A browser with Web Speech API support on the speaker machine
 - Node.js 18+ only if you want the optional local relay server
 
+## First Step For Live Rooms
+
+Before using any network mode, follow the consolidated local setup guide first:
+
+- `https://mgifford.github.io/AirScript/local-setup.html`
+
+Use `mac-internet-sharing.html` only when venue network conditions require that specific workaround.
+
 ## Modes
 
 ### 1. Static Browser Mode
@@ -112,7 +120,7 @@ Then open:
 - **No live audience text yet:** Static mode works without relay. Configure relay mode only when you need cross-device SSE updates.
 - **I don't have internet at my event:** That's fine! AirScript requires **zero internet**. Run `npm start` and serve locally from your laptop. All transcription, caption updates, and QR codes work entirely on the local network.
 - **Venue Wi-Fi blocks device-to-device traffic:** Use Internet Sharing to create your own network, or run local relay mode (`npm start`) and share your laptop's IP.
-- **Need network setup help:** Open `https://mgifford.github.io/AirScript/mac-internet-sharing.html` for two options: using your regular Wi-Fi and local relay, or setting up Mac Internet Sharing.
+- **Need setup help:** Start with `https://mgifford.github.io/AirScript/local-setup.html`, then use `https://mgifford.github.io/AirScript/mac-internet-sharing.html` if you specifically need Internet Sharing.
 
 The local relay accepts cross-origin browser requests so a separately hosted static speaker page can post captions to it, provided browser security rules allow the origin/transport combination.
 
@@ -243,7 +251,8 @@ Note: If you only have one Wi-Fi radio, macOS cannot share Wi-Fi to Wi-Fi. In th
 
 For step-by-step help with both setups:
 
-- `https://mgifford.github.io/AirScript/mac-internet-sharing.html`
+- `https://mgifford.github.io/AirScript/local-setup.html` (primary first step)
+- `https://mgifford.github.io/AirScript/mac-internet-sharing.html` (Internet Sharing-specific)
 
 ## HTTP Endpoints
 
