@@ -507,7 +507,17 @@
       return composeAudienceUrl() || getDefaultStaticAudienceUrl();
     }
 
+    function isStaticPagesPreviewMode() {
+      return window.LocalSyncConfig.isGithubPagesHost(window.location.hostname);
+    }
+
     function renderFallbackQr() {
+      if (isStaticPagesPreviewMode()) {
+        audienceHelp.textContent = 'QR disabled in static preview mode. Use local install and open the LAN URL for live sessions.';
+        audienceQrUrl.textContent = 'Unavailable in static preview mode.';
+        return;
+      }
+
       const qrTargetUrl = getQrTargetUrl();
       audienceQrUrl.textContent = qrTargetUrl;
 
@@ -538,6 +548,14 @@
 
     function renderOnboardingQr(url) {
       onboardingQrWrap.innerHTML = '';
+
+      if (isStaticPagesPreviewMode()) {
+        onboardingQrWrap.textContent = 'QR disabled in static preview mode.';
+        onboardingQrUrl.textContent = 'Unavailable in static preview mode.';
+        onboardingQrNote.textContent = 'Install and run AirScript locally, then share the LAN URL from that host.';
+        return;
+      }
+
       onboardingQrUrl.textContent = url;
 
       if (typeof window.qrcode !== 'function') {
@@ -596,12 +614,23 @@
     function refreshOnboardingUi() {
       const audienceUrl = getQrTargetUrl();
       const speakerUrl = getCanonicalSpeakerUrl();
+      const isStaticPagesMode = isStaticPagesPreviewMode();
 
-      onboardingAudienceUrl.textContent = audienceUrl;
-      onboardingSpeakerUrl.textContent = speakerUrl;
-      openAudienceLink.href = audienceUrl;
-      openSpeakerCanonicalLink.href = speakerUrl;
-      openSpeakerCanonicalLink.textContent = speakerUrl;
+      if (isStaticPagesMode) {
+        onboardingAudienceUrl.textContent = 'Live audience URL unavailable in static preview mode.';
+        onboardingSpeakerUrl.textContent = 'Use local setup to generate speaker and audience LAN URLs.';
+        openAudienceLink.href = '../local-setup.html';
+        openAudienceLink.textContent = 'Open Local Install And Setup';
+        openSpeakerCanonicalLink.href = '../local-setup.html';
+        openSpeakerCanonicalLink.textContent = '../local-setup.html';
+      } else {
+        onboardingAudienceUrl.textContent = audienceUrl;
+        onboardingSpeakerUrl.textContent = speakerUrl;
+        openAudienceLink.href = audienceUrl;
+        openAudienceLink.textContent = 'Open Audience Demo';
+        openSpeakerCanonicalLink.href = speakerUrl;
+        openSpeakerCanonicalLink.textContent = speakerUrl;
+      }
 
       renderOnboardingQr(audienceUrl);
       renderOnboardingChecks();
@@ -628,22 +657,29 @@
 
       const audienceUrl = composeAudienceUrl();
       const qrTargetUrl = getQrTargetUrl();
-      audienceHelp.textContent = audienceUrl
-        ? `Audience URL: ${audienceUrl}`
-        : `Default static audience URL: ${getDefaultStaticAudienceUrl()}`;
-      audienceQrUrl.textContent = qrTargetUrl;
+      const isStaticPagesMode = isStaticPagesPreviewMode();
+
+      if (isStaticPagesMode) {
+        audienceHelp.textContent = 'Static preview mode. Use local install to generate a usable audience URL and QR code.';
+        audienceQrUrl.textContent = 'Unavailable in static preview mode.';
+      } else {
+        audienceHelp.textContent = audienceUrl
+          ? `Audience URL: ${audienceUrl}`
+          : `Default static audience URL: ${getDefaultStaticAudienceUrl()}`;
+        audienceQrUrl.textContent = qrTargetUrl;
+      }
 
       if (!runtimeConfig.audienceUrlOverride && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
         onboardingQrNote.textContent = 'This page is opened on localhost, so QR may not work for other devices. Open speaker with your LAN IP or set Audience URL Override.';
-      } else if (window.LocalSyncConfig.isGithubPagesHost(window.location.hostname) && !runtimeConfig.audienceUrlOverride) {
-        onboardingQrNote.textContent = 'This is GitHub Pages static hosting. For a real room demo, run local server on your laptop and use a LAN URL (for example http://192.168.x.x:8000/demo/), or set Audience URL Override.';
+      } else if (isStaticPagesMode) {
+        onboardingQrNote.textContent = 'This is GitHub Pages static preview. Install and run locally, then share LAN URL and QR from that host.';
       } else {
         onboardingQrNote.textContent = 'Scan this from another device to open the audience page.';
       }
 
       const mixedContentRisk = window.location.protocol === 'https:' && runtimeConfig.relayBaseUrl.startsWith('http://');
-      if (window.LocalSyncConfig.isGithubPagesHost(window.location.hostname) && !runtimeConfig.audienceUrlOverride) {
-        staticNotes.textContent = 'You are on GitHub Pages static hosting. Live audience updates for a room cannot be demonstrated here by default. Run local server on your laptop and open speaker and audience from the same LAN host (for example http://192.168.x.x:8000), or provide Audience URL Override.';
+      if (isStaticPagesMode) {
+        staticNotes.textContent = 'You are on GitHub Pages static preview. Do not use this URL for live-room sharing. Install and run AirScript locally, then open speaker and audience from the same LAN host (for example https://192.168.x.x:8000).';
       } else {
         staticNotes.textContent = mixedContentRisk
           ? 'This page is on HTTPS and the relay is HTTP. Browsers usually block that as mixed content. Use the local Express server directly or expose the relay over HTTPS.'

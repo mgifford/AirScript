@@ -765,10 +765,22 @@
       networkHelpLink.textContent = 'Local install and network setup';
 
       demoUrlText.textContent = shareableAudienceUrl || 'Live audience URL unavailable in static preview mode.';
-      demoIndexUrlText.textContent = demoIndexUrl;
-      openDemoLink.href = demoIndexUrl;
-      openDemoLink.textContent = demoIndexUrl;
-      openSpeakerLink.href = speakerUrl;
+      demoIndexUrlText.textContent = isStaticPagesMode
+        ? 'Use local setup to generate usable speaker and audience links.'
+        : demoIndexUrl;
+
+      if (isStaticPagesMode) {
+        openDemoLink.href = '../local-setup.html';
+        openDemoLink.textContent = 'Open Local Install And Setup';
+        openSpeakerLink.href = '../local-setup.html';
+        openSpeakerLink.textContent = 'Open Local Install And Setup';
+      } else {
+        openDemoLink.href = demoIndexUrl;
+        openDemoLink.textContent = demoIndexUrl;
+        openSpeakerLink.href = speakerUrl;
+        openSpeakerLink.textContent = 'Open Speaker Console';
+      }
+
       renderSetupQr(shareableAudienceUrl);
       renderSetupChecks();
     }
