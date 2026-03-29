@@ -1,0 +1,36 @@
+name: Accessibility Scanner
+
+on:
+  schedule:
+    # Run at 09:00 UTC on the 1st day of every month
+    - cron: '0 9 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  accessibility_scanner:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check required GH_TOKEN secret
+        if: ${{ secrets.GH_TOKEN == '' }}
+        run: |
+          echo "Missing required secret: GH_TOKEN"
+          echo "Create a fine-grained PAT and store it as repository secret GH_TOKEN."
+          echo "Required repo permissions for the token: actions:write, contents:write, issues:write, pull-requests:write, metadata:read"
+          echo "Then rerun this workflow from the Actions tab."
+          exit 1
+
+      - name: accessibility-scanner
+        if: ${{ secrets.GH_TOKEN != '' }}
+        uses: github/accessibility-scanner@v2.12.0
+        with:
+          urls: |
+            https://mgifford.github.io/AirScript/
+            https://mgifford.github.io/AirScript/demo/
+            https://mgifford.github.io/AirScript/demo/speaker.html
+          repository: ${{ github.repository }}
+          token: ${{ secrets.GH_TOKEN }}
+          cache_key: cached_results-airscript-main.json
+          skip_copilot_assignment: false
