@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check required GH_TOKEN secret
-        if: ${{ secrets.GH_TOKEN == '' }}
+        if: secrets.GH_TOKEN == ''
         run: |
           echo "Missing required secret: GH_TOKEN"
           echo "Create a fine-grained PAT and store it as repository secret GH_TOKEN."
@@ -23,7 +23,7 @@ jobs:
           exit 1
 
       - name: accessibility-scanner
-        if: ${{ secrets.GH_TOKEN != '' }}
+        if: secrets.GH_TOKEN != ''
         uses: github/accessibility-scanner@v2.12.0
         with:
           urls: |
