@@ -12,6 +12,8 @@ permissions:
 jobs:
   accessibility_scanner:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: accessibility-scanner
         uses: github/accessibility-scanner@v2.12.0
