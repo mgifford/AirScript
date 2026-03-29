@@ -45,18 +45,17 @@ For this repository, the default public demo URL is:
 
 The canonical document URL is `https://mgifford.github.io/AirScript/demo/index.html`, but the shorter `/demo/` path is the one intended for QR codes and sharing.
 
-This repository includes a GitHub Actions workflow at [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml) that publishes the `docs/` directory to GitHub Pages.
-
 Minimal GitHub Pages setup:
 
 1. Push the repository to GitHub.
 2. In the repository settings, open Pages.
-3. Set Build and deployment Source to GitHub Actions.
-4. Push to `main` or run the `Deploy GitHub Pages` workflow manually.
+3. Set Build and deployment Source to `Deploy from a branch`.
+4. Set Branch to `main` and folder to `/docs`.
+5. Save settings and wait for the Pages publish to complete.
 
-The workflow publishes a root redirect and places the actual static app under `demo/`. It also generates `site-config.js` from the repository owner and repository name so forks automatically get their own Pages URL without code edits.
+The static app is served from `docs/demo/`, so the public URL stays at `/demo/`. The root `docs/index.html` page is a lightweight landing page that points people to the demo and speaker views first.
 
-The static artifact includes [docs/.nojekyll](docs/.nojekyll) so GitHub Pages serves the folder as plain static content without Jekyll processing.
+The repository includes [docs/.nojekyll](docs/.nojekyll) so GitHub Pages serves the folder as plain static content without Jekyll processing.
 
 The speaker page also includes a browser-side QR fallback. If the locally generated `qr.png` is missing, it renders a QR code for the default GitHub Pages demo URL instead.
 
@@ -71,8 +70,16 @@ npm start
 
 Then open:
 
-- Audience view: `http://YOUR_LOCAL_IP:8000/`
-- Speaker view: `http://YOUR_LOCAL_IP:8000/speaker.html`
+- Audience view: `http://YOUR_LOCAL_IP:8000/demo/`
+- Speaker view: `http://YOUR_LOCAL_IP:8000/demo/speaker.html`
+
+## Troubleshooting
+
+- **Pages URL returns 404:** Confirm repository Pages settings are `Deploy from a branch`, branch `main`, folder `/docs`, and then wait for the next publish.
+- **Speaker says Web Speech is unsupported:** Use Chrome or Edge for speaker mode. Safari and Firefox support may be limited.
+- **Audience QR does not open the right page:** Verify it resolves to `/demo/` or `/demo/index.html`. Refresh the speaker page after changing publish mode or relay URL.
+- **Relay updates fail from GitHub Pages:** If the page is HTTPS and the relay is `http://`, browsers usually block requests as mixed content. Use local server mode or an HTTPS relay.
+- **No live audience text yet:** Static mode works without relay. Configure relay mode only when you need cross-device SSE updates.
 
 The local relay accepts cross-origin browser requests so a separately hosted static speaker page can post captions to it, provided browser security rules allow the origin/transport combination.
 

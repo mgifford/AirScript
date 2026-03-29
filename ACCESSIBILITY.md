@@ -76,7 +76,7 @@ We are always learning. If you encounter a barrier while using this tool, please
 
 ### Implementation Note
 
-To make this document live, AirScript includes an Accessibility Settings menu directly on the audience page in [docs/index.html](docs/index.html). It is a user preference control, not an accessibility overlay: it helps each attendee personalize how captions are displayed on their own device without claiming to repair inaccessible markup.
+To make this document live, AirScript includes an Accessibility Settings menu directly on the audience page in [docs/demo/index.html](docs/demo/index.html). It is a user preference control, not an accessibility overlay: it helps each attendee personalize how captions are displayed on their own device without claiming to repair inaccessible markup.
 
 The current implementation follows the direction described in these personalization references:
 

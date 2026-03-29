@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LocalSync Captions</title>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <script src="https://unpkg.com/htmx.org/dist/ext/sse.js"></script>
+  <script src="./site-config.js"></script>
+  <script src="./app-config.js"></script>
+  <script src="./vendor/qrcode.js"></script>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: linear-gradient(180deg, #fff8ef 0%, #f9fafb 55%, #eef2ff 100%);
+      --panel: rgba(255, 255, 255, 0.88);
+      --text: #0f172a;
+      --muted: #334155;
+      --accent: #0f766e;
+      --border: rgba(15, 23, 42, 0.12);
+      --caption-size: clamp(2rem, 7vw, 5.5rem);
+      --caption-line-height: 1.08;
+      --body-scale: 1;
+      --control-bg: rgba(15, 23, 42, 0.04);
+      --control-text: var(--text);
+      --control-border: var(--border);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: radial-gradient(circle at top, #16314b 0%, #06111c 45%, #02050a 100%);
+        --panel: rgba(6, 17, 28, 0.8);
+        --text: #f8fafc;
+        --muted: #bfd4e5;
+        --accent: #fde047;
+        --border: rgba(191, 212, 229, 0.2);
+        --control-bg: rgba(255, 255, 255, 0.08);
+        --control-text: #f8fafc;
+        --control-border: rgba(191, 212, 229, 0.2);
+      }
+    }
+
+    body[data-theme="light"] {
+      color-scheme: light;
+      --bg: linear-gradient(180deg, #fff8ef 0%, #f9fafb 55%, #eef2ff 100%);
+      --panel: rgba(255, 255, 255, 0.88);
+      --text: #0f172a;
+      --muted: #334155;
+      --accent: #0f766e;
+      --border: rgba(15, 23, 42, 0.12);
+      --control-bg: rgba(15, 23, 42, 0.04);
+      --control-text: #0f172a;
+      --control-border: rgba(15, 23, 42, 0.12);
+    }
+
+    body[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: radial-gradient(circle at top, #16314b 0%, #06111c 45%, #02050a 100%);
+      --panel: rgba(6, 17, 28, 0.8);
+      --text: #f8fafc;
+      --muted: #bfd4e5;
+      --accent: #fde047;
+      --border: rgba(191, 212, 229, 0.2);
+      --control-bg: rgba(255, 255, 255, 0.08);
+      --control-text: #f8fafc;
+      --control-border: rgba(191, 212, 229, 0.2);
+    }
+
+    body[data-theme="contrast"] {
+      color-scheme: dark;
+      --bg: #000000;
+      --panel: #000000;
+      --text: #fff200;
+      --muted: #fff8a6;
+      --accent: #fff200;
+      --border: rgba(255, 242, 0, 0.55);
+      --control-bg: #111111;
+      --control-text: #fff200;
+      --control-border: rgba(255, 242, 0, 0.55);
+    }
+
+    body[data-text-size="small"] {
+      --caption-size: clamp(1.7rem, 5.5vw, 4.4rem);
+      --body-scale: 0.95;
+    }
+
+    body[data-text-size="large"] {
+      --caption-size: clamp(2.4rem, 8vw, 6.4rem);
+      --body-scale: 1.08;
+    }
+
+    body[data-text-size="x-large"] {
+      --caption-size: clamp(2.8rem, 9vw, 7.4rem);
+      --body-scale: 1.16;
+    }
+
+    body[data-line-spacing="wide"] {
+      --caption-line-height: 1.35;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: ui-rounded, "Avenir Next", "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 5vw;
+      font-size: calc(1rem * var(--body-scale));
+    }
+
+    main {
+      width: min(100%, 64rem);
+      margin: 0 auto;
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .stack {
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 1.5rem;
+      -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    #settings-shell {
+      padding: 1.25rem;
+    }
+
+    #start-shell {
+      padding: 1.5rem;
+    }
+
+    .hero-title {
+      margin-bottom: 0.3rem;
+    }
+
+    .hero-copy {
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 56rem;
+    }
+
+    .start-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: 1.15fr 0.85fr;
+      align-items: start;
+    }
+
+    .start-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .action-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0.8rem 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--control-border);
+      background: var(--accent);
+      color: #081018;
+      text-decoration: none;
+      font-weight: 800;
+    }
+
+    .action-link.secondary {
+      background: var(--control-bg);
+      color: var(--control-text);
+    }
+
+    .setup-list,
+    .status-list {
+      margin: 0;
+      padding-left: 1.25rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .url-card,
+    .status-card,
+    .qr-card {
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.32);
+    }
+
+    .url-card p,
+    .status-card p,
+    .qr-card p {
+      margin-bottom: 0.55rem;
+    }
+
+    .status-ok,
+    .status-warn {
+      font-weight: 800;
+    }
+
+    .status-ok {
+      color: var(--accent);
+    }
+
+    .status-warn {
+      color: #b45309;
+    }
+
+    body[data-theme="contrast"] .status-warn {
+      color: #fff200;
+    }
+
+    #start-qr {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 16rem;
+    }
+
+    #start-qr img {
+      width: min(100%, 15rem);
+      height: auto;
+      background: white;
+      border-radius: 1rem;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+    }
+
+    .mono-link {
+      overflow-wrap: anywhere;
+    }
+
+    .settings-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    }
+
+    .setting-group {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .setting-group label,
+    .setting-group legend {
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .setting-group fieldset {
+      border: 0;
+      margin: 0;
+      padding: 0;
+      min-width: 0;
+    }
+
+    .setting-button,
+    .setting-select {
+      min-height: 44px;
+      border-radius: 0.9rem;
+      border: 1px solid var(--control-border);
+      background: var(--control-bg);
+      color: var(--control-text);
+      padding: 0.7rem 0.95rem;
+      font: inherit;
+    }
+
+    .setting-button {
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .setting-button[aria-pressed="true"] {
+      background: var(--accent);
+      color: #081018;
+      border-color: transparent;
+    }
+
+    .setting-select {
+      width: 100%;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.78rem;
+      margin: 0 0 0.75rem;
+    }
+
+    #caption-shell {
+      padding: 1.5rem;
+      min-height: 42vh;
+      display: flex;
+      align-items: center;
+    }
+
+    #display {
+      font-size: var(--caption-size);
+      font-weight: 800;
+      line-height: var(--caption-line-height);
+      overflow-wrap: anywhere;
+    }
+
+    #slide-shell {
+      padding: 1.25rem;
+      min-height: 22vh;
+    }
+
+    #slide-display {
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      line-height: 1.5;
+    }
+
+    .slide-placeholder {
+      border: 1px dashed var(--border);
+      border-radius: 1rem;
+      padding: 1rem;
+    }
+
+    #connection-note {
+      color: var(--muted);
+      font-size: 0.98rem;
+      line-height: 1.5;
+    }
+
+    #live-status {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.4;
+    }
+
+    code {
+      font-family: "SF Mono", "Menlo", monospace;
+      font-size: 0.92rem;
+    }
+
+    .fade-in {
+      animation: fade-in 220ms ease-out;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .fade-in {
+        animation: none;
+      }
+    }
+
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (forced-colors: active) {
+      body {
+        background: Canvas;
+        color: CanvasText;
+      }
+
+      .panel,
+      .setting-button,
+      .setting-select,
+      .slide-placeholder {
+        border-color: CanvasText;
+      }
+
+      .setting-button[aria-pressed="true"] {
+        background: Highlight;
+        color: HighlightText;
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 1rem;
+      }
+
+      .start-grid {
+        grid-template-columns: 1fr;
+      }
+
+      #caption-shell,
+      #slide-shell {
+        border-radius: 1.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="panel" id="start-shell">
+      <div class="stack">
+        <p class="eyebrow">Start Here</p>
+        <h1 class="hero-title">AirScript Demo</h1>
+        <p class="hero-copy">Open the speaker console on the presenter device, then share this demo URL or QR code with audience phones. This page also checks what this browser can support so people can tell quickly whether they are on a speaker-ready device or just an audience viewer.</p>
+        <div class="start-grid">
+          <div class="stack">
+            <div class="start-actions">
+              <a class="action-link" id="open-speaker-link" href="./speaker.html">Open Speaker Console</a>
+              <a class="action-link secondary mono-link" id="open-demo-link" href="./index.html">Open Canonical Demo URL</a>
+            </div>
+            <div class="url-card">
+              <p><strong>Audience demo URL</strong></p>
+              <p class="mono-link" id="demo-url-text"></p>
+              <p><strong>Canonical document URL</strong></p>
+              <p class="mono-link" id="demo-index-url-text"></p>
+            </div>
+            <div class="status-card">
+              <p><strong>Browser checks</strong></p>
+              <ul class="status-list" id="setup-status-list"></ul>
+            </div>
+            <div class="status-card">
+              <p><strong>Quick start</strong></p>
+              <ol class="setup-list">
+                <li>Open the speaker console on the device with the microphone.</li>
+                <li>Use Chrome or Edge there if you want browser-native speech capture.</li>
+                <li>Share this demo URL or let audience phones scan the QR code.</li>
+                <li>Add a relay URL later if you want cross-device live updates over SSE.</li>
+              </ol>
+            </div>
+          </div>
+          <div class="qr-card">
+            <p><strong>Audience QR code</strong></p>
+            <div id="start-qr" aria-live="polite"></div>
+            <p id="qr-help">Scan to open the audience demo on another device.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="panel" id="settings-shell">
+      <div class="stack">
+        <p class="eyebrow">Accessibility Settings</p>
+        <div class="settings-grid">
+          <div class="setting-group">
+            <fieldset>
+              <legend>Theme</legend>
+              <div class="button-row" id="theme-controls">
+                <button class="setting-button" type="button" data-setting-group="theme" data-setting-value="system" aria-pressed="true" hx-on:click="window.LocalSyncAudienceSettings.setTheme('system')">System</button>
+                <button class="setting-button" type="button" data-setting-group="theme" data-setting-value="light" aria-pressed="false" hx-on:click="window.LocalSyncAudienceSettings.setTheme('light')">Light</button>
+                <button class="setting-button" type="button" data-setting-group="theme" data-setting-value="dark" aria-pressed="false" hx-on:click="window.LocalSyncAudienceSettings.setTheme('dark')">Dark</button>
+                <button class="setting-button" type="button" data-setting-group="theme" data-setting-value="contrast" aria-pressed="false" hx-on:click="window.LocalSyncAudienceSettings.setTheme('contrast')">High Contrast</button>
+              </div>
+            </fieldset>
+          </div>
+          <div class="setting-group">
+            <label for="text-size-select">Text Size</label>
+            <select class="setting-select" id="text-size-select" hx-on:change="window.LocalSyncAudienceSettings.setTextSize(this.value)">
+              <option value="medium">Medium</option>
+              <option value="small">Small</option>
+              <option value="large">Large</option>
+              <option value="x-large">Extra Large</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label for="line-spacing-select">Line Spacing</label>
+            <select class="setting-select" id="line-spacing-select" hx-on:change="window.LocalSyncAudienceSettings.setLineSpacing(this.value)">
+              <option value="standard">Standard</option>
+              <option value="wide">Wide</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <span>Reset</span>
+            <button class="setting-button" type="button" hx-on:click="window.LocalSyncAudienceSettings.reset()">Use Device Defaults</button>
+          </div>
+        </div>
+        <p class="visually-hidden" id="settings-announcer" aria-live="polite"></p>
+      </div>
+    </section>
+    <section class="panel" id="caption-shell">
+      <div class="stack">
+        <p class="eyebrow">Live Captions</p>
+        <p id="connection-note">Waiting for a configured caption stream.</p>
+        <p id="live-status">Screen reader live announcements are enabled.</p>
+        <div id="caption-stream" sse-swap="caption-update">
+          <div id="display" class="caption-text" role="status" aria-live="polite" aria-atomic="false">Waiting for speaker...</div>
+        </div>
+      </div>
+    </section>
+    <section class="panel" id="slide-shell">
+      <p class="eyebrow">Slides</p>
+      <div id="slide-stream" sse-swap="slide-change">
+        <div id="slide-display" class="slide-frame">
+          <section class="slide-placeholder">Slides are not live yet.</section>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script>
+    const config = window.LocalSyncConfig.loadConfig();
+    const siteConfig = window.LocalSyncConfig.getSiteConfig();
+    const connectionNote = document.getElementById('connection-note');
+    const captionStream = document.getElementById('caption-stream');
+    const slideStream = document.getElementById('slide-stream');
+    const settingsAnnouncer = document.getElementById('settings-announcer');
+    const openSpeakerLink = document.getElementById('open-speaker-link');
+    const openDemoLink = document.getElementById('open-demo-link');
+    const demoUrlText = document.getElementById('demo-url-text');
+    const demoIndexUrlText = document.getElementById('demo-index-url-text');
+    const setupStatusList = document.getElementById('setup-status-list');
+    const startQr = document.getElementById('start-qr');
+    const qrHelp = document.getElementById('qr-help');
+    const textSizeSelect = document.getElementById('text-size-select');
+    const lineSpacingSelect = document.getElementById('line-spacing-select');
+    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    const speechRecognitionSupported = Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
+    const defaultAudienceSettings = {
+      theme: 'system',
+      textSize: 'medium',
+      lineSpacing: 'standard'
+    };
+    const settingsStorageKey = 'localsync-audience-settings';
+
+    function readAudienceSettings() {
+      try {
+        const raw = window.localStorage.getItem(settingsStorageKey);
+        return raw ? { ...defaultAudienceSettings, ...JSON.parse(raw) } : { ...defaultAudienceSettings };
+      } catch (error) {
+        return { ...defaultAudienceSettings };
+      }
+    }
+
+    function writeAudienceSettings(settings) {
+      window.localStorage.setItem(settingsStorageKey, JSON.stringify(settings));
+    }
+
+    function syncPressedButtons(group, activeValue) {
+      const buttons = document.querySelectorAll(`[data-setting-group="${group}"]`);
+      for (const button of buttons) {
+        button.setAttribute('aria-pressed', String(button.dataset.settingValue === activeValue));
+      }
+    }
+
+    function applyAudienceSettings(settings, announcement) {
+      if (settings.theme === 'system') {
+        delete document.body.dataset.theme;
+      } else {
+        document.body.dataset.theme = settings.theme;
+      }
+
+      if (settings.textSize === 'medium') {
+        delete document.body.dataset.textSize;
+      } else {
+        document.body.dataset.textSize = settings.textSize;
+      }
+
+      if (settings.lineSpacing === 'standard') {
+        delete document.body.dataset.lineSpacing;
+      } else {
+        document.body.dataset.lineSpacing = settings.lineSpacing;
+      }
+
+      textSizeSelect.value = settings.textSize;
+      lineSpacingSelect.value = settings.lineSpacing;
+      syncPressedButtons('theme', settings.theme);
+      writeAudienceSettings(settings);
+
+      if (announcement) {
+        settingsAnnouncer.textContent = announcement;
+      }
+    }
+
+    const audienceSettings = readAudienceSettings();
+
+    window.LocalSyncAudienceSettings = {
+      setTheme(theme) {
+        audienceSettings.theme = theme;
+        applyAudienceSettings(audienceSettings, `Theme changed to ${theme}.`);
+      },
+      setTextSize(textSize) {
+        audienceSettings.textSize = textSize;
+        applyAudienceSettings(audienceSettings, `Text size changed to ${textSize}.`);
+      },
+      setLineSpacing(lineSpacing) {
+        audienceSettings.lineSpacing = lineSpacing;
+        applyAudienceSettings(audienceSettings, `Line spacing changed to ${lineSpacing}.`);
+      },
+      reset() {
+        audienceSettings.theme = defaultAudienceSettings.theme;
+        audienceSettings.textSize = defaultAudienceSettings.textSize;
+        audienceSettings.lineSpacing = defaultAudienceSettings.lineSpacing;
+        applyAudienceSettings(audienceSettings, 'Display preferences reset to device defaults.');
+      }
+    };
+
+    function connectStream(streamUrl) {
+      document.body.setAttribute('hx-ext', 'sse');
+      document.body.setAttribute('sse-connect', streamUrl);
+      window.htmx.process(document.body);
+    }
+
+    function getDemoUrl() {
+      return siteConfig.demoUrl || new URL('./', window.location.href).toString();
+    }
+
+    function getDemoIndexUrl() {
+      return siteConfig.demoIndexUrl || new URL('index.html', getDemoUrl()).toString();
+    }
+
+    function getSpeakerUrl() {
+      return new URL('speaker.html', getDemoUrl()).toString();
+    }
+
+    function renderSetupQr(url) {
+      if (typeof window.qrcode !== 'function') {
+        startQr.textContent = url;
+        qrHelp.textContent = 'QR library unavailable in this browser. Copy the audience URL above.';
+        return;
+      }
+
+      const qr = window.qrcode(0, 'M');
+      qr.addData(url);
+      qr.make();
+      startQr.innerHTML = qr.createImgTag(6, 8, `QR code for ${url}`);
+      const qrImage = startQr.querySelector('img');
+      if (qrImage) {
+        qrImage.alt = `QR code for ${url}`;
+      }
+    }
+
+    function renderSetupChecks() {
+      const checks = [
+        {
+          ok: window.isSecureContext,
+          okLabel: 'Secure context is available on this page.',
+          warnLabel: 'This page is not in a secure context. Browser microphone capture usually requires HTTPS or localhost.'
+        },
+        {
+          ok: speechRecognitionSupported,
+          okLabel: 'This browser can act as a speaker device with the Web Speech API.',
+          warnLabel: 'This browser does not expose the Web Speech API. Use Chrome or Edge on the speaker device.'
+        },
+        {
+          ok: Boolean(config.streamUrl),
+          okLabel: 'A live relay stream is configured for this audience page.',
+          warnLabel: 'No relay stream is configured yet. This demo still works as a static audience page.'
+        },
+        {
+          ok: navigator.onLine,
+          okLabel: 'This device reports that it is online.',
+          warnLabel: 'This device reports that it is offline. Local relay mode can still work if the page is already loaded.'
+        }
+      ];
+
+      setupStatusList.innerHTML = '';
+      for (const check of checks) {
+        const item = document.createElement('li');
+        item.className = check.ok ? 'status-ok' : 'status-warn';
+        item.textContent = check.ok ? check.okLabel : check.warnLabel;
+        setupStatusList.appendChild(item);
+      }
+    }
+
+    function renderStartHere() {
+      const demoUrl = getDemoUrl();
+      const demoIndexUrl = getDemoIndexUrl();
+      const speakerUrl = getSpeakerUrl();
+
+      demoUrlText.textContent = demoUrl;
+      demoIndexUrlText.textContent = demoIndexUrl;
+      openDemoLink.href = demoIndexUrl;
+      openDemoLink.textContent = demoIndexUrl;
+      openSpeakerLink.href = speakerUrl;
+      renderSetupQr(demoUrl);
+      renderSetupChecks();
+    }
+
+    applyAudienceSettings(audienceSettings);
+    renderStartHere();
+
+    prefersDarkScheme.addEventListener('change', () => {
+      if (audienceSettings.theme === 'system') {
+        applyAudienceSettings(audienceSettings);
+      }
+    });
+
+    window.addEventListener('online', renderSetupChecks);
+    window.addEventListener('offline', renderSetupChecks);
+
+    if (config.streamUrl) {
+      connectStream(config.streamUrl);
+      connectionNote.innerHTML = `Connected to <code>${config.streamUrl}</code>.`;
+    } else {
+      captionStream.removeAttribute('sse-swap');
+      slideStream.removeAttribute('sse-swap');
+      const defaultUrl = siteConfig.demoUrl || window.location.href;
+      connectionNote.innerHTML = `No stream is configured. Default static URL: <code>${defaultUrl}</code>. Add <code>?relay=https://your-relay-host</code> or <code>?stream=https://your-relay-host/stream</code> when you want live audience updates.`;
+    }
+  </script>
+</body>
+</html>

@@ -6,7 +6,7 @@ const fs = require('fs/promises');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 8000;
-const qrPath = path.join(__dirname, 'docs', 'qr.png');
+const qrPath = path.join(__dirname, 'docs', 'demo', 'qr.png');
 
 const state = {
   caption: 'Waiting for speaker...',
@@ -151,17 +151,18 @@ app.get('/status', (req, res) => {
 app.listen(PORT, '0.0.0.0', async () => {
   const localIP = getLocalIP();
   const url = `http://${localIP}:${PORT}`;
+  const demoUrl = `${url}/demo/`;
 
   try {
-    await writeQrCode(url);
+    await writeQrCode(demoUrl);
   } catch (error) {
     console.error('Failed to write QR code:', error);
   }
 
-  console.log(`LocalSync Captions available at ${url}`);
-  console.log(`Speaker controls: ${url}/speaker.html`);
+  console.log(`LocalSync Captions available at ${demoUrl}`);
+  console.log(`Speaker controls: ${demoUrl}speaker.html`);
 
-  qrcode.toString(url, { type: 'terminal', small: true }, (error, output) => {
+  qrcode.toString(demoUrl, { type: 'terminal', small: true }, (error, output) => {
     if (error) {
       console.error('Failed to print QR code:', error);
       return;
