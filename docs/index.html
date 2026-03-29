@@ -68,7 +68,7 @@
       line-height: 1.6;
     }
 
-    .actions {
+    .site-nav {
       display: flex;
       gap: 0.75rem;
       flex-wrap: wrap;
@@ -98,20 +98,42 @@
       font-family: "SF Mono", "Menlo", monospace;
       overflow-wrap: anywhere;
     }
+
+    .site-footer {
+      margin-top: 1rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+
+    .site-footer a {
+      display: inline;
+      min-height: unset;
+      border-radius: 0;
+      padding: 0;
+      border: none;
+      background: none;
+      color: var(--accent);
+      text-decoration: underline;
+      font-weight: normal;
+    }
   </style>
 </head>
 <body>
   <main>
     <h1>AirScript</h1>
     <p>Start with the demo pages below. No setup reading is required to see the interface.</p>
-    <div class="actions">
+    <nav class="site-nav" aria-label="Site navigation">
       <a class="primary" href="./demo/">Open Demo</a>
-      <a href="./demo/speaker.html">Open Speaker Console</a>
+      <a href="./demo/speaker.html">Speaker Console</a>
       <a href="./local-setup.html">Local Install And Setup</a>
       <a href="./mac-internet-sharing.html">Mac Internet Sharing Guide</a>
-      <a href="./demo/index.html">Open Canonical Demo URL</a>
-    </div>
+      <a href="https://github.com/mgifford/AirScript/" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    </nav>
     <p>Share this URL for audience phones: <code>./demo/</code></p>
   </main>
+  <footer class="site-footer">
+    <p>AirScript is open source. Found a bug or have a suggestion? <a href="https://github.com/mgifford/AirScript/" target="_blank" rel="noopener noreferrer">Open an issue on GitHub ↗</a>.</p>
+  </footer>
 </body>
 </html>
