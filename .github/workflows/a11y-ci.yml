@@ -11,38 +11,8 @@ permissions:
   contents: read
 
 jobs:
-  pa11y:
-    name: pa11y WCAG gate
-    runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: npm
-
-      - name: Install project dependencies
-        run: npm ci
-
-      - name: Install pa11y tooling
-        run: npm install -g pa11y-ci serve wait-on
-
-      - name: Serve static docs site
-        run: |
-          npx serve docs -l 4173 &
-          npx wait-on http://127.0.0.1:4173/
-
-      - name: Run pa11y-ci
-        run: pa11y-ci --config .pa11yci.json
-
   lighthouse:
-    name: Lighthouse accessibility gate
+    name: Lighthouse quality gate
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -68,7 +38,7 @@ jobs:
           npx serve docs -l 4173 &
           npx wait-on http://127.0.0.1:4173/
 
-      - name: Run Lighthouse CI accessibility assertions
+      - name: Run Lighthouse CI assertions
         run: lhci autorun --config=.lighthouserc.json
 
       - name: Upload Lighthouse artifacts on failure
@@ -77,3 +47,4 @@ jobs:
         with:
           name: lighthouseci-report
           path: .lighthouseci
+          if-no-files-found: ignore

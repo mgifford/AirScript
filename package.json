@@ -15,5 +15,9 @@
     "express": "^4.21.2",
     "qrcode": "^1.5.4",
     "qrcode-generator": "^2.0.4"
+  },
+  "devDependencies": {
+    "@lhci/cli": "^0.15.1",
+    "lighthouse": "^13.0.3"
   }
 }
