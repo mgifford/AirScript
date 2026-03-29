@@ -101,7 +101,7 @@ Contributor guidance for future personalization work:
 
 ### CI/CD Enforcement
 
-- Pull requests and `main` pushes run an accessibility CI gate using pa11y and Lighthouse against key pages.
-- Lighthouse accessibility score is enforced at `>= 0.90` in CI.
+- Pull requests and `main` pushes run a Lighthouse CI gate against the landing page, audience page, speaker page, and setup guide.
+- Lighthouse accessibility is enforced at `1.00`, while performance is enforced at `0.90` to reduce flaky failures.
 - Scheduled monthly scans run via `github/accessibility-scanner` to catch broader regressions and open actionable issues.
-- Any critical contrast failures identified by CI should be treated as merge-blocking until resolved.
+- Any critical contrast, keyboard, or semantic regressions identified by CI should be treated as merge-blocking until resolved.

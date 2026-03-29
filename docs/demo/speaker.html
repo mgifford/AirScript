@@ -488,6 +488,10 @@
     }
 
     function getDefaultStaticAudienceUrl() {
+      if (window.LocalSyncConfig.isGithubPagesHost(window.location.hostname)) {
+        return siteConfig.localDemoPlaceholderUrl || siteConfig.demoUrl || siteConfig.demoIndexUrl || window.location.href;
+      }
+
       return siteConfig.demoUrl || siteConfig.demoIndexUrl || window.location.href;
     }
 

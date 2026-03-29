@@ -1,3 +1,5 @@
 node_modules/
 docs/demo/qr.png
+.local-ssl/
+.lighthouseci/
 .DS_Store

@@ -8,6 +8,7 @@
   const derivedRepoOwner = currentUrl.hostname.endsWith('github.io')
     ? currentUrl.hostname.replace(/\.github\.io$/i, '')
     : 'mgifford';
+  const localPlaceholderBaseUrl = `https://YOUR_IP_ADDRESS/${derivedRepoName}/`;
 
   function withTrailingSlash(value) {
     return value.endsWith('/') ? value : `${value}/`;
@@ -40,6 +41,8 @@
     pagesBaseUrl,
     demoUrl,
     demoIndexUrl: new URL('index.html', demoUrl).toString(),
+    localDemoPlaceholderUrl: `${localPlaceholderBaseUrl}${demoPath}/`,
+    localSpeakerPlaceholderUrl: `${localPlaceholderBaseUrl}${demoPath}/speaker.html`,
     generatedBy: 'static-default'
   };
 })();

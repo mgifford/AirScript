@@ -30,16 +30,8 @@ jobs:
       - name: Install project dependencies
         run: npm ci
 
-      - name: Install Lighthouse tooling
-        run: npm install -g @lhci/cli serve wait-on
-
-      - name: Serve static docs site
-        run: |
-          npx serve docs -l 4173 &
-          npx wait-on http://127.0.0.1:4173/
-
       - name: Run Lighthouse CI assertions
-        run: lhci autorun --config=.lighthouserc.json
+        run: npm run test:lighthouse
 
       - name: Upload Lighthouse artifacts on failure
         if: failure()

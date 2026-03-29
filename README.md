@@ -23,6 +23,17 @@ The root GitHub Pages URL redirects into the demo, but the `/demo/` path is the 
 - Optional bearer-token support for compatible third-party relay endpoints
 - Dynamic QR code generation from the local Node relay when you run it
 
+## How It Works
+
+AirScript now has a simple split of responsibilities:
+
+1. The speaker page handles speech capture and default transcription in the browser.
+2. The audience page is a lightweight reading interface with local personalization controls.
+3. The optional Node relay exists to broadcast captions and slides to other devices.
+4. The relay also serves the static files locally, prints or generates the QR code, and exposes SSE endpoints.
+
+The longer architecture and deployment notes live in [HOW_IT_WORKS.md](./HOW_IT_WORKS.md).
+
 ## Requirements
 
 - A browser with Web Speech API support on the speaker machine
@@ -68,10 +79,29 @@ npm install
 npm start
 ```
 
+By default, a successful local server start:
+
+- serves the app over local HTTPS using a self-signed certificate
+- opens the speaker page in Google Chrome when available, then Microsoft Edge, then your default browser
+
+The first time, Chrome or Edge may show a certificate warning. Accept the self-signed certificate for your LAN URL before starting captions.
+
+If you want less friction than a self-signed certificate, see the self-hosting options below. The short version is:
+
+- `self-signed`: easiest offline default, rough first-run trust UX
+- `mkcert` or another local CA: smoother repeated local use on managed devices
+- reverse proxy with a real certificate: best long-term option when you control a domain or managed edge
+
+To disable automatic browser launch:
+
+```bash
+OPEN_BROWSER=0 npm start
+```
+
 Then open:
 
-- Audience view: `http://YOUR_LOCAL_IP:8000/demo/`
-- Speaker view: `http://YOUR_LOCAL_IP:8000/demo/speaker.html`
+- Audience view: `https://YOUR_LOCAL_IP:8000/demo/`
+- Speaker view: `https://YOUR_LOCAL_IP:8000/demo/speaker.html`
 
 ## Troubleshooting
 
@@ -91,12 +121,17 @@ The local relay accepts cross-origin browser requests so a separately hosted sta
 This repository now has layered accessibility automation in GitHub Actions:
 
 - PR and main-branch gate: `.github/workflows/a11y-ci.yml`
-  - Runs `pa11y-ci` against key URLs in `.pa11yci.json`.
-  - Runs Lighthouse accessibility assertions from `.lighthouserc.json`.
-  - Fails the workflow when accessibility score drops below `0.90`.
+  - Runs Lighthouse assertions from `.lighthouserc.json`.
+  - Fails the workflow when accessibility drops below `1.00` or performance drops below `0.90`.
 - Scheduled and manual deep scan: `.github/workflows/accessibility-scanner.yml`
   - Runs monthly on the 1st and can be triggered manually.
   - Uses `github/accessibility-scanner` to open trackable issues.
+
+Run the same local check with:
+
+```bash
+npm run test:lighthouse
+```
 
 The CI gate currently scans:
 
@@ -119,11 +154,23 @@ Recommended token permissions:
 
 If contrast still feels weak in specific places, run the `Accessibility CI` workflow and inspect which route fails. That gives a concrete target before visual adjustments.
 
+## Self-Hosting Options
+
+If you want to avoid the harsh self-signed certificate experience, there are three realistic self-hosted paths:
+
+1. Keep the current self-signed HTTPS default for fully offline rooms. This is the most resilient option, but the first trust prompt is unavoidable.
+2. Use a local certificate authority workflow such as `mkcert` for repeat local use on devices you manage. This improves trust UX without requiring a public host.
+3. Put the relay behind a reverse proxy with a publicly trusted certificate when you have a real domain or managed network edge. This is the cleanest browser experience, but it is no longer a purely ad hoc offline setup.
+
+There is a fourth option, plain HTTP on a LAN, but it is intentionally no longer the default because modern browser security rules make it brittle.
+
+Detailed tradeoffs are documented in [HOW_IT_WORKS.md](./HOW_IT_WORKS.md).
+
 ## GitHub Pages Notes
 
 - The default transcription engine is the MDN [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API)
 - HTMX is still part of the design. It handles SSE-driven audience updates rather than microphone capture, because the Web Speech API itself must run in browser JavaScript.
-- If the page is served over HTTPS, browsers usually block requests from that page to an `http://` relay. That matters when GitHub Pages tries to talk to a local LAN relay such as `http://192.168.2.1:8000`.
+- If the page is served over HTTPS, browsers usually block requests from that page to an `http://` relay. That matters when GitHub Pages tries to talk to an older local LAN relay such as `http://192.168.2.1:8000`, so the local relay now serves HTTPS with a self-signed certificate instead.
 - For local audience broadcasting, the cleanest path is to use the local Express server directly for both the speaker and audience pages.
 - For remote or third-party services, prefer an HTTPS relay endpoint that accepts `POST /update` and exposes `GET /stream`.
 
@@ -176,9 +223,9 @@ If your venue has regular Wi-Fi (or any network where devices can see each other
 
 1. Run `npm install && npm start` on your laptop.
 2. Find your laptop's IP: **System Settings** → **Wi-Fi** → **Details**, or run `ifconfig | grep inet` in Terminal.
-3. Share the URL with audience, e.g., `http://192.168.1.100:8000/demo/`.
+3. Share the URL with audience, e.g., `https://192.168.1.100:8000/demo/`.
 4. Audience joins your Wi-Fi and navigates to that URL.
-5. Open speaker console on your laptop at `http://localhost:8000/demo/speaker.html`.
+5. Open speaker console on your laptop at `https://localhost:8000/demo/speaker.html`.
 6. Start speaking. Captions sync in real-time to all devices—no internet needed.
 
 ### If Venue Wi-Fi Blocks Local Traffic: macOS Internet Sharing

@@ -654,10 +654,18 @@
     }
 
     function getDemoUrl() {
+      if (window.LocalSyncConfig.isGithubPagesHost(window.location.hostname)) {
+        return siteConfig.localDemoPlaceholderUrl || siteConfig.demoUrl || new URL('./', window.location.href).toString();
+      }
+
       return siteConfig.demoUrl || new URL('./', window.location.href).toString();
     }
 
     function getDemoIndexUrl() {
+      if (window.LocalSyncConfig.isGithubPagesHost(window.location.hostname)) {
+        return getDemoUrl();
+      }
+
       return siteConfig.demoIndexUrl || new URL('index.html', getDemoUrl()).toString();
     }
 
