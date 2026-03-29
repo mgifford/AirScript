@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AirScript: Mac Internet Sharing Guide</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: linear-gradient(160deg, #f8fafc 0%, #e0f2fe 45%, #fefce8 100%);
+      --ink: #0f172a;
+      --muted: #475569;
+      --panel: rgba(255, 255, 255, 0.9);
+      --border: rgba(15, 23, 42, 0.14);
+      --accent: #0f766e;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: radial-gradient(circle at top, #16314b 0%, #06111c 45%, #02050a 100%);
+        --ink: #f8fafc;
+        --muted: #bfd4e5;
+        --panel: rgba(6, 17, 28, 0.84);
+        --border: rgba(191, 212, 229, 0.2);
+        --accent: #fde047;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      padding: 1.25rem;
+    }
+
+    main {
+      width: min(100%, 64rem);
+      margin: 0 auto;
+      border: 1px solid var(--border);
+      border-radius: 1.25rem;
+      background: var(--panel);
+      padding: 1.25rem;
+      display: grid;
+      gap: 1rem;
+    }
+
+    h1,
+    h2,
+    p {
+      margin: 0;
+    }
+
+    p,
+    li {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    ol,
+    ul {
+      margin: 0;
+      padding-left: 1.25rem;
+      display: grid;
+      gap: 0.4rem;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+    }
+
+    a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      border-radius: 999px;
+      padding: 0.7rem 1rem;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      color: var(--ink);
+      background: white;
+      font-weight: 800;
+    }
+
+    a.primary {
+      background: var(--accent);
+      color: #081018;
+      border-color: transparent;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      background: rgba(255, 255, 255, 0.42);
+      padding: 0.9rem 1rem;
+      display: grid;
+      gap: 0.6rem;
+    }
+
+    code {
+      font-family: "SF Mono", "Menlo", monospace;
+      overflow-wrap: anywhere;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Mac Internet Sharing For AirScript</h1>
+    <p>Use this when venue Wi-Fi blocks local device-to-device traffic. Your Mac will create a local Wi-Fi network so audience phones can open the AirScript demo directly.</p>
+
+    <div class="actions">
+      <a class="primary" href="./demo/speaker.html">Open Speaker Console</a>
+      <a href="./demo/">Open Audience Demo</a>
+      <a href="./">Back To Landing Page</a>
+    </div>
+
+    <section class="card">
+      <h2>Step By Step (macOS Ventura/Sonoma+)</h2>
+      <ol>
+        <li>Open <strong>System Settings</strong>.</li>
+        <li>Go to <strong>General</strong> -> <strong>Sharing</strong>.</li>
+        <li>Open <strong>Internet Sharing</strong> options.</li>
+        <li>Set <strong>Share your connection from</strong> to your upstream network (usually Wi-Fi or Ethernet).</li>
+        <li>Set <strong>To computers using</strong> to <strong>Wi-Fi</strong>.</li>
+        <li>Configure a network name and password under Wi-Fi options.</li>
+        <li>Toggle <strong>Internet Sharing</strong> on and confirm.</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h2>Then Start AirScript</h2>
+      <ol>
+        <li>Open <code>https://mgifford.github.io/AirScript/demo/speaker.html</code> on the presenter laptop.</li>
+        <li>Join audience phones to the shared network.</li>
+        <li>Have attendees scan the QR code shown on the speaker page.</li>
+        <li>Start captions in Chrome or Edge on the speaker device.</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h2>If It Still Fails</h2>
+      <ul>
+        <li>Reconnect the phone to the shared SSID and disable VPN on both devices.</li>
+        <li>Confirm the speaker page shows a valid Audience URL and QR code.</li>
+        <li>If you are using relay mode from GitHub Pages, avoid <code>http://</code> relay targets from an <code>https://</code> page.</li>
+        <li>When in doubt, keep the default static mode first, then add relay once baseline works.</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

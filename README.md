@@ -80,6 +80,7 @@ Then open:
 - **Audience QR does not open the right page:** Verify it resolves to `/demo/` or `/demo/index.html`. Refresh the speaker page after changing publish mode or relay URL.
 - **Relay updates fail from GitHub Pages:** If the page is HTTPS and the relay is `http://`, browsers usually block requests as mixed content. Use local server mode or an HTTPS relay.
 - **No live audience text yet:** Static mode works without relay. Configure relay mode only when you need cross-device SSE updates.
+- **Need Mac Internet Sharing help:** Open `https://mgifford.github.io/AirScript/mac-internet-sharing.html` for step-by-step setup from System Settings.
 
 The local relay accepts cross-origin browser requests so a separately hosted static speaker page can post captions to it, provided browser security rules allow the origin/transport combination.
 
@@ -132,11 +133,20 @@ If an API key is entered in the speaker UI, it is sent as `Authorization: Bearer
 
 ## Network Setup
 
-1. Open System Settings > General > Sharing.
-2. Enable Internet Sharing.
-3. Share your connection to Wi-Fi.
-4. Configure the Wi-Fi network name and password.
-5. Join audience devices to the same network and scan the QR code.
+### macOS Internet Sharing (recommended for events)
+
+1. Open **System Settings**.
+2. Go to **General** -> **Sharing**.
+3. Open **Internet Sharing** settings.
+4. Set **Share your connection from** to your active uplink (Wi-Fi or Ethernet).
+5. Set **To computers using** to **Wi-Fi**.
+6. Configure Wi-Fi options (SSID and password).
+7. Turn **Internet Sharing** on.
+8. On audience phones, join that shared Wi-Fi and scan the QR code from `/demo/speaker.html`.
+
+If these steps are hard to follow in the room, use the dedicated guide page:
+
+- `https://mgifford.github.io/AirScript/mac-internet-sharing.html`
 
 ## HTTP Endpoints
 
