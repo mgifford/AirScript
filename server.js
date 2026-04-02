@@ -287,7 +287,22 @@ async function start() {
   });
 }
 
-start().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (require.main === module) {
+  start().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  app,
+  state,
+  clients,
+  escapeHtml,
+  formatCaptionMarkup,
+  formatSlideMarkup,
+  sendSseEvent,
+  broadcast,
+  getLocalIP,
+  pickExternalIPv4
+};

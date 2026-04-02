@@ -7,7 +7,22 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
+    "test": "jest",
     "test:lighthouse": "serve docs -l 4173 >/tmp/localsync-serve.log 2>&1 & SERVER_PID=$!; wait-on http://127.0.0.1:4173/ && lhci autorun --config=.lighthouserc.json; STATUS=$?; kill $SERVER_PID; exit $STATUS"
+  },
+  "jest": {
+    "projects": [
+      {
+        "displayName": "server",
+        "testEnvironment": "node",
+        "testMatch": ["<rootDir>/server.test.js"]
+      },
+      {
+        "displayName": "browser",
+        "testEnvironment": "jsdom",
+        "testMatch": ["<rootDir>/docs/demo/**/*.test.js"]
+      }
+    ]
   },
   "engines": {
     "node": ">=18"
@@ -20,8 +35,11 @@
   },
   "devDependencies": {
     "@lhci/cli": "^0.15.1",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.3.0",
     "lighthouse": "^13.0.3",
     "serve": "^14.2.5",
+    "supertest": "^7.2.2",
     "wait-on": "^9.0.1"
   }
 }
