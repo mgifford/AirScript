@@ -364,7 +364,8 @@ describe('POST /slides', () => {
   });
 
   test('ignores non-string html values', async () => {
-    await request(app).post('/slides').send({ html: 42 });
+    const res = await request(app).post('/slides').send({ html: 42 });
+    expect(res.status).toBe(200);
     expect(state.slideHtml).toContain('Slides are not live yet');
   });
 });

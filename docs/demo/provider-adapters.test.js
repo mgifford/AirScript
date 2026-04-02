@@ -803,7 +803,8 @@ describe('LocalSyncProviders.createProviderSession – https-json stale sequence
   test('discards a response that arrives after a newer one has already been delivered', async () => {
     // Set up a mock fetch that, crucially, does NOT reject on abort so that
     // both requests stay in flight simultaneously.  This lets us control the
-    // resolution order and trigger the stale-sequence guard (line 179).
+    // resolution order and trigger the stale-sequence guard
+    // (currentSequence < deliveredSequence → return).
     let resolveFirstFetch, resolveSecondFetch;
     const firstFetchPromise = new Promise((resolve) => { resolveFirstFetch = resolve; });
     const secondFetchPromise = new Promise((resolve) => { resolveSecondFetch = resolve; });
