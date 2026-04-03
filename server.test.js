@@ -362,12 +362,24 @@ describe('POST /slides', () => {
     expect(combined).toContain('slide-change');
     expect(combined).toContain('live');
   });
+
+  test('ignores non-string html values', async () => {
+    const res = await request(app).post('/slides').send({ html: 42 });
+    expect(res.status).toBe(200);
+    expect(state.slideHtml).toContain('Slides are not live yet');
+  });
 });
 
 describe('CORS middleware', () => {
   test('sets Access-Control-Allow-Origin to *', async () => {
     const res = await request(app).get('/status');
     expect(res.headers['access-control-allow-origin']).toBe('*');
+  });
+
+  test('sets Access-Control-Allow-Headers', async () => {
+    const res = await request(app).get('/status');
+    expect(res.headers['access-control-allow-headers']).toMatch(/Content-Type/);
+    expect(res.headers['access-control-allow-headers']).toMatch(/Authorization/);
   });
 
   test('OPTIONS preflight returns 204', async () => {
@@ -396,6 +408,61 @@ describe('GET /stream', () => {
         expect(clients.size).toBeGreaterThan(0);
         req.destroy();
         srv.close(done);
+      });
+    });
+  });
+
+  test('sends the current caption as the first SSE event', (done) => {
+    state.caption = 'Hello stream test';
+    const http = require('http');
+    const srv = app.listen(0, '127.0.0.1', () => {
+      const port = srv.address().port;
+      let received = '';
+      const req = http.get(`http://127.0.0.1:${port}/stream`, (res) => {
+        res.on('data', (chunk) => {
+          received += chunk.toString();
+          if (received.includes('Hello stream test')) {
+            expect(received).toContain('caption-update');
+            req.destroy();
+            srv.close(done);
+          }
+        });
+      });
+    });
+  });
+
+  test('sends the current slide HTML as the second SSE event', (done) => {
+    state.slideHtml = '<section>Stream slide content</section>';
+    const http = require('http');
+    const srv = app.listen(0, '127.0.0.1', () => {
+      const port = srv.address().port;
+      let received = '';
+      const req = http.get(`http://127.0.0.1:${port}/stream`, (res) => {
+        res.on('data', (chunk) => {
+          received += chunk.toString();
+          if (received.includes('Stream slide content')) {
+            expect(received).toContain('slide-change');
+            req.destroy();
+            srv.close(done);
+          }
+        });
+      });
+    });
+  });
+
+  test('removes the client from the set when the connection closes', (done) => {
+    clients.clear();
+    const http = require('http');
+    const srv = app.listen(0, '127.0.0.1', () => {
+      const port = srv.address().port;
+      const req = http.get(`http://127.0.0.1:${port}/stream`, () => {
+        const countWhileOpen = clients.size;
+        expect(countWhileOpen).toBeGreaterThan(0);
+        req.destroy();
+        setTimeout(() => {
+          expect(clients.size).toBeLessThan(countWhileOpen);
+          srv.close(done);
+        }, 100);
       });
     });
   });

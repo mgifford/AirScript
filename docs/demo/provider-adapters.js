@@ -155,35 +155,42 @@
       const currentSequence = requestSequence;
       abortController = new AbortController();
 
-      const response = await fetch(config.providerEndpoint, {
-        method: 'POST',
-        mode: 'cors',
-        signal: abortController.signal,
-        headers: window.LocalSyncConfig.publishHeaders(config.apiKey),
-        body: JSON.stringify({
-          text: rawText,
-          prompt: config.providerPrompt || '',
-          source: 'web-speech',
-          timestamp: new Date().toISOString()
-        })
-      });
+      try {
+        const response = await fetch(config.providerEndpoint, {
+          method: 'POST',
+          mode: 'cors',
+          signal: abortController.signal,
+          headers: window.LocalSyncConfig.publishHeaders(config.apiKey),
+          body: JSON.stringify({
+            text: rawText,
+            prompt: config.providerPrompt || '',
+            source: 'web-speech',
+            timestamp: new Date().toISOString()
+          })
+        });
 
-      if (!response.ok) {
-        throw new Error(`Provider request failed with HTTP ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`Provider request failed with HTTP ${response.status}`);
+        }
+
+        const responseBody = await readRemoteResponse(response);
+
+        if (currentSequence < deliveredSequence) {
+          return;
+        }
+
+        deliveredSequence = currentSequence;
+        hooks.onCaption?.(extractRemoteCaption(responseBody, config.providerResponseField || 'text', lastRawText), {
+          provider: 'https-json',
+          rawText,
+          responseBody
+        });
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          return;
+        }
+        hooks.onCaption?.(lastRawText, { provider: 'https-json', rawText, error });
       }
-
-      const responseBody = await readRemoteResponse(response);
-
-      if (currentSequence < deliveredSequence) {
-        return;
-      }
-
-      deliveredSequence = currentSequence;
-      hooks.onCaption?.(extractRemoteCaption(responseBody, config.providerResponseField || 'text', lastRawText), {
-        provider: 'https-json',
-        rawText,
-        responseBody
-      });
     }
 
     return {

@@ -229,6 +229,45 @@ describe('LocalSyncConfig.saveConfig and loadConfig', () => {
     const config = getFreshConfig();
     expect(() => config.loadConfig()).not.toThrow();
   });
+
+  test('loadConfig reads apiKey from sessionStorage', () => {
+    const config = getFreshConfig();
+    window.sessionStorage.setItem('localsync-api-key', 'session-token');
+    const loaded = config.loadConfig();
+    expect(loaded.apiKey).toBe('session-token');
+  });
+
+  test('saveConfig stores providerEndpoint and providerResponseField', () => {
+    const config = getFreshConfig();
+    config.saveConfig({
+      providerEndpoint: 'https://api.example.com/caption',
+      providerResponseField: 'result.text'
+    });
+    const stored = JSON.parse(window.localStorage.getItem('localsync-config'));
+    expect(stored.providerEndpoint).toBe('https://api.example.com/caption');
+    expect(stored.providerResponseField).toBe('result.text');
+  });
+
+  test('saveConfig stores providerPrompt', () => {
+    const config = getFreshConfig();
+    config.saveConfig({ providerPrompt: 'Clean up the transcript.' });
+    const stored = JSON.parse(window.localStorage.getItem('localsync-config'));
+    expect(stored.providerPrompt).toBe('Clean up the transcript.');
+  });
+
+  test('saveConfig computes streamUrl from relayBaseUrl when streamUrl is absent', () => {
+    const config = getFreshConfig();
+    config.saveConfig({ relayBaseUrl: 'https://192.168.1.5:8000' });
+    const stored = JSON.parse(window.localStorage.getItem('localsync-config'));
+    expect(stored.streamUrl).toBe('https://192.168.1.5:8000/stream');
+  });
+
+  test('loadConfig includes streamUrl derived from relayBaseUrl', () => {
+    const config = getFreshConfig();
+    config.saveConfig({ relayBaseUrl: 'https://192.168.1.5:8000' });
+    const loaded = config.loadConfig();
+    expect(loaded.streamUrl).toBe('https://192.168.1.5:8000/stream');
+  });
 });
 
 // ── getSiteConfig ─────────────────────────────────────────────────────────────
