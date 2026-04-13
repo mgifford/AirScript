@@ -10,6 +10,37 @@
   <script src="./vendor/qrcode.js"></script>
   <style>
     :root {
+      color-scheme: light dark;
+      --bg: linear-gradient(160deg, #f8fafc 0%, #e0f2fe 45%, #fefce8 100%);
+      --ink: #0f172a;
+      --muted: #1f2937;
+      --accent: #0b5f59;
+      --accent-text: #ffffff;
+      --accent-strong: #166534;
+      --panel: #ffffff;
+      --card-bg: #f8fafc;
+      --input-bg: #ffffff;
+      --border: rgba(15, 23, 42, 0.12);
+      --error: #b91c1c;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: radial-gradient(circle at top, #16314b 0%, #06111c 45%, #02050a 100%);
+        --ink: #f8fafc;
+        --muted: #dbeafe;
+        --accent: #fde047;
+        --accent-text: #111827;
+        --accent-strong: #fef08a;
+        --panel: #0b1220;
+        --card-bg: #0f1b2d;
+        --input-bg: #0f1b2d;
+        --border: rgba(191, 212, 229, 0.2);
+        --error: #fca5a5;
+      }
+    }
+
+    body[data-theme="light"] {
       color-scheme: light;
       --bg: linear-gradient(160deg, #f8fafc 0%, #e0f2fe 45%, #fefce8 100%);
       --ink: #0f172a;
@@ -22,6 +53,45 @@
       --input-bg: #ffffff;
       --border: rgba(15, 23, 42, 0.12);
       --error: #b91c1c;
+    }
+
+    body[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: radial-gradient(circle at top, #16314b 0%, #06111c 45%, #02050a 100%);
+      --ink: #f8fafc;
+      --muted: #dbeafe;
+      --accent: #fde047;
+      --accent-text: #111827;
+      --accent-strong: #fef08a;
+      --panel: #0b1220;
+      --card-bg: #0f1b2d;
+      --input-bg: #0f1b2d;
+      --border: rgba(191, 212, 229, 0.2);
+      --error: #fca5a5;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 100;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--ink);
+      cursor: pointer;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .theme-toggle:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
     }
 
     * {
@@ -99,7 +169,7 @@
     }
 
     .action-link.secondary {
-      background: #f1f5f9;
+      background: var(--card-bg);
       color: var(--ink);
     }
 
@@ -183,7 +253,7 @@
     }
 
     button.secondary {
-      background: #f1f5f9;
+      background: var(--card-bg);
       color: var(--ink);
       border: 1px solid var(--border);
     }
@@ -307,6 +377,7 @@
   </style>
 </head>
 <body>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode">🌙</button>
   <main>
     <section class="panel onboarding">
       <h1>Start Here</h1>
@@ -862,5 +933,38 @@
   <footer class="site-footer">
     <p>AirScript is open source. Found a bug or have a suggestion? <a href="https://github.com/mgifford/AirScript/" target="_blank" rel="noopener noreferrer">Open an issue on GitHub ↗</a>.</p>
   </footer>
+  <script>
+    (function () {
+      const btn = document.getElementById('theme-toggle');
+      const storageKey = 'airscript-theme';
+
+      function getEffectiveTheme() {
+        const stored = localStorage.getItem(storageKey);
+        if (stored === 'light' || stored === 'dark') return stored;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+
+      function applyTheme(theme) {
+        document.body.dataset.theme = theme;
+        btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+        btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+      }
+
+      function toggleTheme() {
+        const next = getEffectiveTheme() === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(storageKey, next);
+        applyTheme(next);
+      }
+
+      applyTheme(getEffectiveTheme());
+      btn.addEventListener('click', toggleTheme);
+
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+        if (!localStorage.getItem(storageKey)) {
+          applyTheme(getEffectiveTheme());
+        }
+      });
+    }());
+  </script>
 </body>
 </html>

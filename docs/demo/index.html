@@ -456,9 +456,34 @@
       color: var(--accent);
       text-decoration: underline;
     }
+
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 100;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .theme-toggle:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
   </style>
 </head>
 <body>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode">🌙</button>
   <main>
     <section class="panel" id="start-shell">
       <div class="stack">
@@ -581,6 +606,7 @@
     const startQrUrl = document.getElementById('start-qr-url');
     const textSizeSelect = document.getElementById('text-size-select');
     const lineSpacingSelect = document.getElementById('line-spacing-select');
+    const themeToggleBtn = document.getElementById('theme-toggle');
     const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
     const speechRecognitionSupported = Boolean(window.SpeechRecognition || window.webkitSpeechRecognition);
     const defaultAudienceSettings = {
@@ -634,6 +660,11 @@
       syncPressedButtons('theme', settings.theme);
       writeAudienceSettings(settings);
 
+      const effectivelyDark = settings.theme === 'dark' || settings.theme === 'contrast' ||
+        (settings.theme === 'system' && prefersDarkScheme.matches);
+      themeToggleBtn.textContent = effectivelyDark ? '☀️' : '🌙';
+      themeToggleBtn.setAttribute('aria-label', effectivelyDark ? 'Switch to light mode' : 'Switch to dark mode');
+
       if (announcement) {
         settingsAnnouncer.textContent = announcement;
       }
@@ -661,6 +692,12 @@
         applyAudienceSettings(audienceSettings, 'Display preferences reset to device defaults.');
       }
     };
+
+    themeToggleBtn.addEventListener('click', function () {
+      const effectivelyDark = audienceSettings.theme === 'dark' || audienceSettings.theme === 'contrast' ||
+        (audienceSettings.theme === 'system' && prefersDarkScheme.matches);
+      window.LocalSyncAudienceSettings.setTheme(effectivelyDark ? 'light' : 'dark');
+    });
 
     function connectStream(streamUrl) {
       document.body.setAttribute('hx-ext', 'sse');
