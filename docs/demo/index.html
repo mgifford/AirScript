@@ -636,6 +636,11 @@
       }
     }
 
+    function isEffectivelyDark(theme) {
+      return theme === 'dark' || theme === 'contrast' ||
+        (theme === 'system' && prefersDarkScheme.matches);
+    }
+
     function applyAudienceSettings(settings, announcement) {
       if (settings.theme === 'system') {
         delete document.body.dataset.theme;
@@ -660,10 +665,9 @@
       syncPressedButtons('theme', settings.theme);
       writeAudienceSettings(settings);
 
-      const effectivelyDark = settings.theme === 'dark' || settings.theme === 'contrast' ||
-        (settings.theme === 'system' && prefersDarkScheme.matches);
-      themeToggleBtn.textContent = effectivelyDark ? '☀️' : '🌙';
-      themeToggleBtn.setAttribute('aria-label', effectivelyDark ? 'Switch to light mode' : 'Switch to dark mode');
+      const dark = isEffectivelyDark(settings.theme);
+      themeToggleBtn.textContent = dark ? '☀️' : '🌙';
+      themeToggleBtn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
 
       if (announcement) {
         settingsAnnouncer.textContent = announcement;
@@ -694,9 +698,7 @@
     };
 
     themeToggleBtn.addEventListener('click', function () {
-      const effectivelyDark = audienceSettings.theme === 'dark' || audienceSettings.theme === 'contrast' ||
-        (audienceSettings.theme === 'system' && prefersDarkScheme.matches);
-      window.LocalSyncAudienceSettings.setTheme(effectivelyDark ? 'light' : 'dark');
+      window.LocalSyncAudienceSettings.setTheme(isEffectivelyDark(audienceSettings.theme) ? 'light' : 'dark');
     });
 
     function connectStream(streamUrl) {
