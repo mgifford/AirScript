@@ -32,6 +32,56 @@
       }
     }
 
+    body[data-theme="light"] {
+      color-scheme: light;
+      --bg: linear-gradient(160deg, #f8fafc 0%, #e0f2fe 45%, #fefce8 100%);
+      --ink: #0f172a;
+      --muted: #334155;
+      --panel: #ffffff;
+      --border: rgba(15, 23, 42, 0.12);
+      --accent: #0b5f59;
+      --accent-text: #ffffff;
+      --button-bg: #ffffff;
+      --button-text: #0f172a;
+    }
+
+    body[data-theme="dark"] {
+      color-scheme: dark;
+      --bg: radial-gradient(circle at top, #16314b 0%, #06111c 45%, #02050a 100%);
+      --ink: #f8fafc;
+      --muted: #d5e7f6;
+      --panel: #08131f;
+      --border: rgba(191, 212, 229, 0.2);
+      --accent: #d4a800;
+      --accent-text: #111827;
+      --button-bg: #0f1c2e;
+      --button-text: #f8fafc;
+    }
+
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 100;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--button-bg);
+      color: var(--button-text);
+      cursor: pointer;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .theme-toggle:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+
     * { box-sizing: border-box; }
 
     body {
@@ -129,6 +179,7 @@
   </style>
 </head>
 <body>
+  <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode">🌙</button>
   <main>
     <h1>AirScript Local Install And Setup</h1>
     <p>Use this page as the single source of truth for live-room setup. GitHub Pages is a static preview; real audience syncing requires local installation on the presenter laptop.</p>
@@ -179,5 +230,38 @@
   <footer class="site-footer">
     <p>AirScript is open source. Found a bug or have a suggestion? <a href="https://github.com/mgifford/AirScript/" target="_blank" rel="noopener noreferrer">Open an issue on GitHub ↗</a>.</p>
   </footer>
+  <script>
+    (function () {
+      const btn = document.getElementById('theme-toggle');
+      const storageKey = 'airscript-theme';
+
+      function getEffectiveTheme() {
+        const stored = localStorage.getItem(storageKey);
+        if (stored === 'light' || stored === 'dark') return stored;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+
+      function applyTheme(theme) {
+        document.body.dataset.theme = theme;
+        btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+        btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+      }
+
+      function toggleTheme() {
+        const next = getEffectiveTheme() === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(storageKey, next);
+        applyTheme(next);
+      }
+
+      applyTheme(getEffectiveTheme());
+      btn.addEventListener('click', toggleTheme);
+
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+        if (!localStorage.getItem(storageKey)) {
+          applyTheme(getEffectiveTheme());
+        }
+      });
+    }());
+  </script>
 </body>
 </html>
