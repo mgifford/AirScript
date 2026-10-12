@@ -37,7 +37,7 @@
     "@lhci/cli": "^0.15.1",
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
-    "lighthouse": "^13.0.3",
+    "lighthouse": "^13.5.0",
     "serve": "^14.2.5",
     "supertest": "^7.2.2",
     "wait-on": "^9.0.1"
